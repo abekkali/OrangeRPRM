@@ -267,8 +267,8 @@ namespace RPRM.Controllers
             });
         }
         [HttpPost]
-        [Route("GetServiceOuverts")]
-        public IActionResult GetServiceOuverts([FromBody] DataTablesRequest data)
+        [Route("GetServicesOuverts")]
+        public IActionResult GetServicesOuverts([FromBody] DataTablesRequest data)
         {
             var draw = data.Draw;
             var start = data.Start;
@@ -277,33 +277,39 @@ namespace RPRM.Controllers
             var orderColumn = data.OrderColumn;
             var orderDirection = data.OrderDirection;
 
-            var query = _context.serviceOuverts.Include(o => o.Operateur).Include(o => o.NomServiceLookup).Include(o => o.DirectionLookup).AsQueryable();
+            var query = _context.serviceOuverts
+                    .Include(o => o.Operateur)
+                    .Include(o => o.NomServiceLookup)
+                    .Include(o => o.DirectionLookup)
+                    .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchValue))
             {
-                query = query.Where(o =>
-                    o.Code_Service.ToString().Contains(searchValue) ||
-                    o.Code_PLMN.Contains(searchValue) ||
-                    o.Destination.Contains(searchValue) ||
-                    o.NomServiceLookup.Value.Contains(searchValue) ||
-                    o.DirectionLookup.Value.Contains(searchValue) ||
-                    o.Operateur.Nom_Op.Contains(searchValue)
+                query = query.Where(s =>
+                    s.Code_Service.ToString().Contains(searchValue) ||
+                    s.Code_PLMN.Contains(searchValue) ||
+                    s.Operateur.Nom_Op.Contains(searchValue) ||
+                    s.Destination.Contains(searchValue) ||
+                    s.NomServiceLookup.Value.Contains(searchValue) ||
+                    s.date_d.ToString().Contains(searchValue) ||
+                    s.date_f.ToString().Contains(searchValue) ||
+                    s.DirectionLookup.Value.Contains(searchValue)
                 );
             }
 
-            // Appliquer le tri
             if (!string.IsNullOrEmpty(orderColumn))
             {
                 var columnMapping = new Dictionary<string, Expression<Func<ServiceOuvert, object>>>
-    {
-        {"Code_Service", o => o.Code_Service},
-        {"Code_PLMN", o => o.Code_PLMN},
-        {"Destination", o => o.Destination},
-        {"NomServiceLookup.Value", o => o.NomServiceLookup.Value},
-        {"date_d", o => o.date_d},
-        {"date_f", o => o.date_f},
-        {"DirectionLookup.Value", o => o.DirectionLookup.Value}
-    };
+        {
+            {"code_Service", s => s.Code_Service},
+            {"code_PLMN", s => s.Code_PLMN},
+            {"nom_Op", s => s.Operateur.Nom_Op},
+            {"destination", s => s.Destination},
+            {"nom_Service", s => s.NomServiceLookup.Value},
+            {"date_d", s => s.date_d},
+            {"date_f", s => s.date_f},
+            {"direction", s => s.DirectionLookup.Value}
+        };
 
                 if (columnMapping.TryGetValue(orderColumn, out var sortExpression))
                 {
@@ -314,16 +320,16 @@ namespace RPRM.Controllers
             var recordsTotal = query.Count();
             var recordsFiltered = query.Count();
 
-            var serviceOuvertData = query.Skip(start).Take(length).ToList().Select(o => new
+            var serviceData = query.Skip(start).Take(length).ToList().Select(s => new
             {
-                o.Code_Service,
-                o.Code_PLMN,
-                OperateurName = o.Operateur.Nom_Op,
-                o.Destination,
-                NomServiceLookup = o.NomServiceLookup.Value,
-                date_d = o.date_d.HasValue ? o.date_d.Value.ToString("dd/MM/yyyy") : null,
-                date_f = o.date_f.HasValue ? o.date_f.Value.ToString("dd/MM/yyyy") : null,
-                DirectionLookup = o.DirectionLookup.Value
+                s.Code_Service,
+                s.Code_PLMN,
+                Nom_Op = s.Operateur.Nom_Op,
+                s.Destination,
+                Nom_Service = s.NomServiceLookup.Value,
+                date_d = s.date_d.HasValue ? s.date_d.Value.ToString("dd/MM/yyyy") : null,
+                date_f = s.date_f.HasValue ? s.date_f.Value.ToString("dd/MM/yyyy") : null,
+                Direction = s.DirectionLookup.Value
             });
 
             return Ok(new
@@ -331,7 +337,7 @@ namespace RPRM.Controllers
                 draw,
                 recordsTotal,
                 recordsFiltered,
-                data = serviceOuvertData
+                data = serviceData
             });
         }
 

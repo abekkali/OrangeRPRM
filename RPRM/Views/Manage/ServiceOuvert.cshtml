@@ -203,18 +203,18 @@
 @section Scripts {
     <script src="~/js/site.js"></script>
     <script>
-        var hasEditPermission = @Html.Raw(Json.Serialize(hasEditPermission));
-
         $(document).ready(function () {
+            var hasEditPermission = @Html.Raw(Json.Serialize(hasEditPermission));
+
             var columns = [
-                { data: "code_Service", name: "Code_Service" },
-                { data: "code_PLMN", name: "Code_PLMN" },
-                { data: "operateurName", name: "OperateurName" },
-                { data: "destination", name: "Destination" },
-                { data: "nomServiceLookup", name: "NomServiceLookup" },
-                { data: "date_d", name: "Date_D" },
-                { data: "date_f", name: "Date_F" },
-                { data: "directionLookup", name: "DirectionLookup" }
+                { data: "code_Service", name: "code_Service" },
+                { data: "code_PLMN", name: "code_PLMN" },
+                { data: "nom_Op", name: "nom_Op" },
+                { data: "destination", name: "destination" },
+                { data: "nom_Service", name: "nom_Service" },
+                { data: "date_d", name: "date_d" },
+                { data: "date_f", name: "date_f" },
+                { data: "direction", name: "direction" }
             ];
 
             if (hasEditPermission) {
@@ -229,15 +229,14 @@
                 columns.push({
                     data: null,
                     render: function (data, type, row) {
-                        return `<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modifySerivceOuvertModal"
+                        return `<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modifyServiceModal"
                                         data-code-service="${row.code_Service}"
-                                        data-plmn="${row.code_PLMN}"
-                                        data-operateur-name="${row.operateurName}"
-                                        data-nom-service="${row.nomServiceLookup}"
-                                        data-dd="${row.date_d}"
-                                        data-df="${row.date_f}"
-                                        data-destination="${row.destination !== null ? row.destination : ''}"
-                                        data-direction="${row.directionLookup}">
+                                        data-code-plmn="${row.code_PLMN}"
+                                        data-destination="${row.destination}"
+                                        data-nom-service="${row.nom_Service}"
+                                        data-date-d="${row.date_d}"
+                                        data-date-f="${row.date_f}"
+                                        data-direction="${row.direction}">
                                         <i class="bi bi-pencil"></i>
                                     </button>`;
                     },
@@ -249,7 +248,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "/api/GetServiceOuverts",
+                    url: "/api/GetServicesOuverts",
                     method: "POST",
                     contentType: "application/json",
                     data: function (d) {
@@ -263,11 +262,14 @@
                         });
                     },
                     dataSrc: function (json) {
+                        json.draw = json.draw;
+                        json.recordsTotal = json.recordsTotal;
+                        json.recordsFiltered = json.recordsFiltered;
+                        json.data = json.data;
                         return json.data;
                     }
                 },
                 columns: columns,
-                order: [[1, 'asc']]
             });
         });
     </script>

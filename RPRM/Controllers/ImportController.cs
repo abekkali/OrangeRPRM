@@ -478,7 +478,7 @@ namespace RPRM.Controllers
             var defaultGroupeCode = defaultGroup.Code_Groupe;
             var newOperateurs = new List<Operateurs>();
             var missingPays = new List<string>();
-
+            var missingOp = new List<string>();
             for (int row = startRow + 1; row < rowCount + startRow; row++)
             {
                 var Code_PLMN = worksheet.Cells[row, columnMappings["PLMN"]].Value?.ToString().Trim();
@@ -594,8 +594,7 @@ namespace RPRM.Controllers
                                 Value = value.ToUpper()
                             };
                             count++;
-                            _context.LookupTable.Add(newLookupTable);
-                        
+                            _context.LookupTable.Add(newLookupTable);           
                             existingRecords.Add((newLookupTable.Lookup_Type, newLookupTable.Value)); 
                         }
                     }
@@ -772,31 +771,33 @@ namespace RPRM.Controllers
 
                 if (string.IsNullOrEmpty(dateValue))
                 {
-                    continue;
-                }
-
-                if (DateTime.TryParse(dateValue, out var parsedDate))
-                {
-                    date_d = parsedDate;
-                }
-                else if (double.TryParse(dateValue, out var excelDate))
-                {
-                    if (excelDate < 1 || excelDate >= 2958466)
-                    {
-                        return $"Date excel non valide ligne {row}";
-                    }
-                    else if (excelDate < 60)
-                    {
-                        date_d = new DateTime(1899, 12, 31).AddDays(excelDate);
-                    }
-                    else
-                    {
-                        date_d = new DateTime(1899, 12, 30).AddDays(excelDate);
-                    }
+                    date_d = null;
                 }
                 else
                 {
-                    return $"Erreur lors de l'analyse de la date '{dateValue}' à la ligne : {row}";
+                    if (DateTime.TryParse(dateValue, out var parsedDate))
+                    {
+                        date_d = parsedDate;
+                    }
+                    else if (double.TryParse(dateValue, out var excelDate))
+                    {
+                        if (excelDate < 1 || excelDate >= 2958466)
+                        {
+                            return $"Date excel non valide ligne {row}";
+                        }
+                        else if (excelDate < 60)
+                        {
+                            date_d = new DateTime(1899, 12, 31).AddDays(excelDate);
+                        }
+                        else
+                        {
+                            date_d = new DateTime(1899, 12, 30).AddDays(excelDate);
+                        }
+                    }
+                    else
+                    {
+                        return $"Erreur lors de l'analyse de la date '{dateValue}' à la ligne : {row}";
+                    }
                 }
 
                 if (!allOperateurs.ContainsKey(Code_PLMN))
