@@ -1253,13 +1253,13 @@
             let myLineChart;
             let myLineChart2;
             let apiResponse;
-         
+
             function createCharts() {
                 setTimeout(function () {
                     // Récupérez les services à partir de localStorage.
                     var lookupData = JSON.parse(localStorage.getItem('lookupData'));
                     var serviceNames = lookupData.filter(item => item.lookup_Type === "Type_Incident").map(item => item.value);
-
+                    console.log(serviceNames);
                     // Création d'un dictionnaire où les clés sont les continents et les valeurs sont des objets.
                     // Les objets contiennent le nombre d'occurrences de chaque service.
                     var dataByContinent = apiResponse.reduce(function (map, item) {
@@ -1271,10 +1271,11 @@
                         }
 
                         item.incidents.forEach(function (incident) {
-                            map[item.continent][incident.nom_Service]++;
+                            map[item.continent][incident.typeIncident]++;
                         });
-
+                        console.log(map);
                         return map;
+
                     }, {});
 
                     // Maintenant, générer le tableau de datasets
@@ -1310,13 +1311,20 @@
                             }
                         }
                     });
+
                     myLineChart2 = new Chart(ctx2, {
                         type: 'pie',
                         data: {
-                            labels: ['Red', 'Blue', 'Yellow'],
+                            labels: serviceNames,
                             datasets: [{
                                 label: '# of Votes',
-                                data: [12, 19, 3],
+                                data: serviceNames.map(function (serviceName) {
+                                    var total = 0;
+                                    Object.keys(dataByContinent).forEach(function (continent) {
+                                        total += dataByContinent[continent][serviceName] || 0;
+                                    });
+                                    return total;
+                                }),
                                 backgroundColor: [
                                     'rgba(255, 99, 132, 0.2)',
                                     'rgba(54, 162, 235, 0.2)',
@@ -1401,7 +1409,7 @@
                         let prevIcon = document.querySelector('.carousel-control-prev-icon');
                         let nextIcon = document.querySelector('.carousel-control-next-icon');
 
-                        prevIcon.style.backgroundColor = '#4154f1'; 
+                        prevIcon.style.backgroundColor = '#4154f1';
                         nextIcon.style.backgroundColor = '#4154f1';
                     }
 

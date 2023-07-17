@@ -263,8 +263,8 @@
             let rna = $('#mmAddRNA').val();
             let ra_terminated = $('#mmAddRaTerminated').val();
             let code_groupe = $('#mmAddGrpName').val();
-            let typeOperateurId = $('#mAddTypeOp').val();
-            let typeAccordId = $('#mAddTypeAccord').val();
+            let typeOperateurId = parseInt($('#mAddTypeOp').val());
+            let typeAccordId = parseInt($('#mAddTypeAccord').val());
             if (!code_plmn || !nom_op || !mcc || !mnc || !pays  || !op_prefered || !rna || !ra_terminated || !code_groupe || !typeOperateurId || !typeAccordId) {
                 alert('Tous les champs sont obligatoires.');
                 return;
@@ -276,11 +276,15 @@
             }
             let operateur = $(this).serializeArray().reduce(function (obj, item) {
                 obj[item.name] = item.name === "Marketshare" && item.value === "" ? null : item.value;
+
                 return obj;
             }, {});
 
 
             $.ajax({
+                headers: {
+                    'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val()
+                },
                 url: '/Manage/AddOperateur',
                 type: 'POST',
                 data: JSON.stringify(operateur),

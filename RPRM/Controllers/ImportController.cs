@@ -591,10 +591,11 @@ namespace RPRM.Controllers
                             LookupTable newLookupTable = new LookupTable
                             {
                                 Lookup_Type = lookuptype,
-                                Value = value
+                                Value = value.ToUpper()
                             };
-                            _context.LookupTable.Add(newLookupTable);
                             count++;
+                            _context.LookupTable.Add(newLookupTable);
+                        
                             existingRecords.Add((newLookupTable.Lookup_Type, newLookupTable.Value)); 
                         }
                     }
