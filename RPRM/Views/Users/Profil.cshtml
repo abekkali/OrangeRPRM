@@ -1,0 +1,190 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using RPRM.Models.User;
+@inject UserManager<User> UserManager
+@{
+    ViewData["Title"] = "Orange - RPRM";
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+    var fullName="";
+    var company = "";
+    var phone = "";
+    var mail = "";
+    if (user != null)
+    {
+     fullName = user.FullName;
+     company = user.Company;
+     phone = user.PhoneNumber;
+     mail = user.Email;
+    }
+
+    else
+    {
+         fullName = "N/A";
+         company = "N/A";
+         phone = "N/A";
+         mail = "N/A";
+    }
+  
+   
+}
+<div class="pagetitle">
+    <h1>Profile</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">Users</li>
+            <li class="breadcrumb-item active">Profile</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section profile">
+    <div class="row">
+        <div>
+            <div class="card">
+                <div id="messageProfil"></div>
+                <div class="card-body pt-3">
+                    <!-- Bordered Tabs -->
+                    <ul class="nav nav-tabs nav-tabs-bordered">
+
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Aperçu</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-permission">Permissions</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Modifier Profile</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Modifier Password</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-2">
+
+                        <div class="tab-pane fade show active profile-overview" id="profile-overview">
+
+                            <h5 class="card-title">Details Profile</h5>
+
+                            <div class="row">
+                                <div class="col-lg-3 col-md-4 label ">Nom Complet</div>
+                                <div class="col-lg-9 col-md-8">@fullName</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-3 col-md-4 label">Compagnie</div>
+                                <div class="col-lg-9 col-md-8">@company</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-3 col-md-4 label">Role</div>
+                                <div class="col-lg-9 col-md-8">@String.Join(", ", roles)</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3 col-md-4 label">
+                                    Téléphone
+                                </div>
+                                <div class="col-lg-9 col-md-8">@phone</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-3 col-md-4 label">Email</div>
+                                <div class="col-lg-9 col-md-8">@mail</div>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+                            <form asp-controller="Users" asp-action="UpdateUser" method="post">
+                                <div class="row mb-3">
+                                    <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Nom Complet</label>
+                                    <div class="col-md-8 col-lg-9">
+                                        <input name="fullName" type="text" class="form-control" id="fullName" value="@fullName">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="company" class="col-md-4 col-lg-3 col-form-label">Companie</label>
+                                    <div class="col-md-8 col-lg-9">
+                                        <input name="company" type="text" class="form-control" id="company" value="@company">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Téléphone</label>
+                                    <div class="col-md-8 col-lg-9">
+                                        <input name="PhoneNumber" type="text" class="form-control" id="Phone" value="@phone">
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Save</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade pt-3" id="profile-permission">
+
+                                <div class="row mb-3">
+                                <label for="Permissions" class="col-md-4 col-lg-3 col-form-label">Mes Permissions</label>
+                                    <div class="col-md-8 col-lg-9">
+                                        
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="tab-pane fade pt-3" id="profile-change-password">
+                            <!-- Formulaire de changement de mot de passe -->
+                            <form id="change-password-form" asp-controller="Users" asp-action="ChangePassword" method="post">
+                                <div class="form-group">
+                                    <label for="OldPassword">Ancien mot de passe</label>
+                                    <input type="password" class="form-control" id="OldPassword" name="oldPassword" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="NewPassword">Nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="NewPassword" name="newPassword" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="ConfirmPassword">Confirmez le nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="ConfirmPassword" name="confirmPassword" />
+                                </div>
+                                <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary">Modifier le mot de passe</button>
+                                </div>
+                            </form>
+
+                            <!-- Fin du formulaire de changement de mot de passe -->
+
+                        </div>
+
+                    </div><!-- End Bordered Tabs -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <script>
+        $("#change-password-form").submit(function (event) {
+            event.preventDefault();
+            var url = $(this).attr("action");
+            var formData = $(this).serialize();
+
+            $.post(url, formData, function (response) {
+                if (response.type === 'success') {
+                    $('#messageProfil').empty();
+                    $('#messageProfil').removeClass().addClass('alert alert-success');
+                    $('#messageProfil').text(response.message);
+                } else {
+                    $('#messageProfil').empty();
+                    $('#messageProfil').removeClass().addClass('alert alert-danger');
+                    $('#messageProfil').text(response.message);
+                    if (response.errors) {
+                        response.errors.forEach(function (error) {
+                            $('#messageProfil').append('<p>' + error + '</p>');
+                        });
+                    }
+                }
+            });
+        });
+
+    </script>
+
+}

@@ -1,0 +1,38 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="container">
+
+    <section class="section error-404 min-vh-100 d-flex flex-column align-items-center justify-content-center">
+        <img src="~/assets/img/logo.png" class="img-fluid py-5" alt="Orange">
+        @if (ViewData["ErrorAccessMessage"] != null)
+        {
+            <h3>Accès non autorisé</h3> <br />
+            <h4>@ViewData["ErrorAccessMessage"]</h4><br />
+        }
+        @if (ViewData["Message"] != null)
+        {
+            <h3>Message d'information</h3> <br />
+            <h4>@ViewData["Message"]</h4><br />
+        }
+        <a class="btn" href="/">Page d'accueil</a>
+        
+    </section>
+
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainElement = document.querySelector('.main');
+            const footer = document.querySelector('.footer');
+            if (mainElement && footer) {
+                mainElement.style.margin='0';
+                footer.style.margin = '0';
+            }
+        });
+    </script>
+  
+
+}

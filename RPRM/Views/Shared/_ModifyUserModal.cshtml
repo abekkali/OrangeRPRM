@@ -1,0 +1,55 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="modal fade" id="modify" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier Utilisateur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Users" asp-action="UpdateUserByAdmin" method="post" asp-anti-forgery="true">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="muserId" value="">
+
+                    <div class="row mb-3">
+                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Nom Complet</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="FullName" type="text" class="form-control" id="mfullName" value="">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="role" class="col-md-4 col-lg-3 col-form-label">Role</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select name="Role" class="form-select" aria-label="Default select example">
+                                @foreach (var option in (List<SelectListItem>)ViewData["RoleOptions"])
+                                {
+                                    <option value="@option.Value">@option.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="company" class="col-md-4 col-lg-3 col-form-label">Companie</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Company" type="text" class="form-control" id="mcompany" value="">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Téléphone</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="PhoneNumber" type="text" class="form-control" id="mPhone" value="">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+</div>

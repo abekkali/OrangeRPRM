@@ -1,0 +1,90 @@
+﻿@using RPRM.Models.Metiers;
+@model List<DocOperateur>
+
+@{
+    ViewData["Title"] = "Orange -RPRM";
+    await Component.InvokeAsync("CheckPermission", new { className = "Contact" });
+    var permissions = TempData["Permissions"] as dynamic;
+    bool hasViewPermission = permissions?.View ?? false;
+    bool hasEditPermission = permissions?.Edit ?? false;
+
+
+}
+
+<div class="pagetitle">
+    <h1>Gestion des Doc Operateur</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">Manager</li>
+            <li class="breadcrumb-item active">Doc Operateur</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Liste des Docs Operateurs</h5>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (ViewBag.modelerr != null)
+        {
+            <div id="errorMessage" class="alert alert-danger">@ViewBag.modelerr</div>
+
+        }
+        <form asp-controller="Manage" asp-action="DeleteSelected" method="post">
+            <table id="table_doc_operateur" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Code DocOperateur</th>
+                        <th scope="col">Code PLMN</th>
+                        <th scope="col">Document</th>
+                        <th scope="col">Type Docuent</th>
+                        <th scope="col">Date Debut</th>
+                        <th scope="col">Date Fin</th>
+                       
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc_operateur in Model)
+                    {
+
+                        <tr>
+                            <td><input class="form-check-input" type="checkbox" name="selectedIds" value="@doc_operateur.Code_DOC"></td>
+                            <td>@doc_operateur.Code_DOC</td>
+                            <td>@doc_operateur.Code_PLMN</td>
+                            <td>@doc_operateur.Document</td>
+                            <td>@doc_operateur.TypeDocLookup.Value</td>
+                            @{
+                                string dd = string.Format("{0:dd/MM/yyyy}", doc_operateur.date_d);
+                                string df = string.Format("{0:dd/MM/yyyy}", doc_operateur.date_f);
+                            }
+                            <td>@dd</td>
+                            <td>@df</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <input type="hidden" name="className" value="DocOperateur" />
+            <input type="checkbox" id="selectAll" class="form-check-input" style="margin-top: 0.4em;margin-left: 0.45em;">
+            Tout cocher <button type="submit" id="delete-btn-check" class="btn btn-sm btn-danger">Supprimer</button>
+        </form>
+        <br />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/site.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#table_doc_operateur').DataTable();
+        });
+    </script>
+
+}

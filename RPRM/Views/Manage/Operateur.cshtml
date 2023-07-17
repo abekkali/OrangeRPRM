@@ -1,0 +1,375 @@
+﻿@using RPRM.Models.Metiers;
+@model List<Operateurs>
+
+@{
+    ViewData["Title"] = "Orange -RPRM";
+    await Component.InvokeAsync("CheckPermission", new { className = "Operateurs" });
+    var permissions = TempData["Permissions"] as dynamic;
+    bool hasViewPermission = permissions?.View ?? false;
+    bool hasEditPermission = permissions?.Edit ?? false;
+
+
+}
+
+<div class="pagetitle">
+    <h1>Gestion opérateur Table</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">Manager</li>
+            <li class="breadcrumb-item active">Opérateur</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Liste des Opérateurs</h5>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        <div id="messageAddOperateur" ></div>
+        @if (hasEditPermission)
+        {
+        <button type="submit" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#AddOPModal">Ajouter un opérateur</button>
+        }
+        <form asp-controller="Manage" asp-action="DeleteSelected" method="post">
+            <table id="table_operateur" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        @if (hasEditPermission)
+                        {
+                            <th scope="col"></th>
+                        }
+                        <th scope="col">Code PLMN</th>
+                        <th scope="col">Code Pays</th>
+                        <th scope="col">Nom Operateur</th>
+                        <th scope="col">MCC</th>
+                        <th scope="col">MNC</th>
+                        <th scope="col">Market share</th>
+                        <th scope="col">Op Prefered</th>
+                        <th scope="col">RNA</th>
+                        <th scope="col">RA Term</th>
+                        <th scope="col">Groupe</th>
+                        <th scope="col">Type Operateur</th>
+                        <th scope="col">Type Accord</th>
+                        @if (hasEditPermission)
+                        {
+                            <th></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            @if (hasEditPermission)
+            {
+            <input type="hidden" name="className" value="Operateur" />
+            <input type="checkbox" id="selectAll" class="form-check-input" style="margin-top: 0.4em;margin-left: 0.45em;">
+                <label>Tout cocher</label> <button type="submit" id="delete-btn-check" class="btn btn-sm btn-danger">Supprimer</button>
+        
+            }
+        </form>
+        <br />
+    </div>
+</div>
+@await Html.PartialAsync("~/Views/Shared/Modal/OperateursModal.cshtml")
+
+
+@section Scripts {
+    <script>
+        var hasEditPermission = @Html.Raw(Json.Serialize(hasEditPermission));
+
+        $(document).ready(function () {
+            var columns = [
+                { data: "code_PLMN", name: "code_PLMN" },
+                { data: "code_pays", name: "code_pays" },
+                { data: "nom_Op", name: "nom_Op" },
+                { data: "mcc", name: "mcc" },
+                { data: "mnc", name: "mnc" },
+                { data: "marketshare", name: "marketshare" },
+                { data: "op_prefered", name: "op_prefered" },
+                { data: "rna", name: "rna" },
+                { data: "rA_Teminated", name: "rA_Teminated" },
+                { data: "nom_Groupe", name: "nom_Groupe" },
+                { data: "typeOperateur", name: "typeOperateur" },
+                { data: "typeAccord", name: "typeAccord" }
+            ];
+
+            if (hasEditPermission) {
+                columns.unshift({
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<input class="form-check-input" type="checkbox" name="selectedIds" value="${row.code_PLMN}">`;
+                    },
+                    orderable: false
+                });
+
+                columns.push({
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modifyOPModal"
+                                    data-code-plmn="${row.code_PLMN}"
+                                    data-nom-op="${row.nom_Op}"
+                                    data-op-prefered="${row.op_prefered}"
+                                    data-groupe="${row.nom_Groupe}"
+                                    data-rna="${row.rna}"
+                                    data-ra-terminated="${row.rA_Teminated}"
+                                    data-marketshare="${row.marketshare}"
+                                    data-type-op="${row.typeOperateur}"
+                                    data-type-accord="${row.typeAccord}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>`;
+                    },
+                    orderable: false
+                });
+            }
+
+            $('#table_operateur').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "/api/GetOperateurs",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: function (d) {
+                        return JSON.stringify({
+                            "Draw": d.draw,
+                            "Start": d.start,
+                            "Length": d.length,
+                            "SearchValue": d.search.value,
+                            "OrderColumn": d.columns[d.order[0].column].name,
+                            "OrderDirection": d.order[0].dir
+                        });
+                    },
+                    dataSrc: function (json) {
+                        json.draw = json.draw;
+                        json.recordsTotal = json.recordsTotal;
+                        json.recordsFiltered = json.recordsFiltered;
+                        json.data = json.data;
+                        return json.data;
+                    }
+                },
+                columns: columns,
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('modifyOPModal');
+            const inputFields = {
+                codePLMN: document.getElementById('mcode_plmn_disabled'),
+                codePLMNhidden: document.getElementById('mcode_plmn_Hidden'),
+                nomOp: document.getElementById('mnom_op'),
+                mk: document.getElementById('mMarketshare'),
+                opPrefered: document.getElementById('mOpPrefered'),
+                rna: document.getElementById('mRNA'),
+                raTerminated: document.getElementById('mRaTerminated'),
+                GroupeSelect: document.getElementById('mGrpName'),
+                typeOp: document.getElementById('mTypeOp'),
+                typeAccord: document.getElementById('mTypeAccord')
+            };
+
+            fetchLookupData().then(function (data) {
+                populateLookupDropdown(data, "Type_Operateur", "mTypeOp")
+                populateLookupDropdown(data, "Type_Operateur", "mAddTypeOp")
+                populateLookupDropdown(data, "Type_Accord", "mTypeAccord");
+                populateLookupDropdown(data, "Type_Accord", "mAddTypeAccord");
+            }).catch(function (error) {
+                console.error('Error occurred while fetching lookup data:', error);
+            });
+            fetchGroupData().then(function (data) {
+                data.sort(function (a, b) {
+                    return a.nom_Groupe.localeCompare(b.nom_Groupe);
+                })
+                const defaultOption = new Option("Sélectionnez une option", "");
+                $('#mGrpName').empty();
+                $('#mGrpName').append(defaultOption);
+                data.forEach(g => {
+                    const option = new Option(g.nom_Groupe, g.code_Groupe);
+                    $('#mGrpName').append(option);
+                });
+                $('#mmAddGrpName').empty();
+                $('#mmAddGrpName').append(defaultOption);
+                data.forEach(g => {
+                    const option = new Option(g.nom_Groupe, g.code_Groupe);
+                    $('#mmAddGrpName').append(option);
+                });
+            }).catch(function (error) {
+                console.error('Error occurred while fetching GroupData data:', error);
+            });
+
+            const tableOperateur = document.getElementById('table_operateur');
+            tableOperateur.addEventListener('click', function (event) {
+                const button = event.target.closest('button[data-bs-target="#modifyOPModal"]');
+                if (button) {
+                    inputFields.codePLMN.value = button.getAttribute('data-code-plmn');
+                    inputFields.codePLMNhidden.value = button.getAttribute('data-code-plmn');
+                    inputFields.nomOp.value = button.getAttribute('data-nom-op');
+                    inputFields.mk.value = button.getAttribute('data-marketshare');
+                    inputFields.opPrefered.value = button.getAttribute('data-op-prefered');
+                    inputFields.rna.value = button.getAttribute('data-rna');
+                    inputFields.raTerminated.value = button.getAttribute('data-ra-terminated');
+
+                    // Select the default option for select fields
+                    selectDefaultOption(inputFields.typeOp, button.getAttribute('data-type-op'));
+                    selectDefaultOption(inputFields.typeAccord, button.getAttribute('data-type-accord'));
+                    selectDefaultOption(inputFields.GroupeSelect, button.getAttribute('data-groupe'));
+                }
+            });
+        }); 
+   
+
+    </script>
+    <script>
+        function isValidPLMN(plmn) {
+            console.log(plmn);
+            console.log(plmn.length);
+            console.log($('#codePlmnError').hasClass('text-success'));
+
+            return plmn && plmn.length === 5 && $('#CodePlmnError').hasClass('text-success');
+        }
+        $('#mAddCode_PLMN').on('keyup', function () {
+            let code_plmn = $(this).val();
+            console.log(code_plmn);
+            if (code_plmn.length != 5) {
+                $('#CodePlmnError').removeClass('text-success').addClass('text-danger').text('Invalide! Le code PLMN doit contenir 5 caractères.');
+                return;
+            }
+            $.get(`/Manage/CheckPlmnCode?code=${encodeURIComponent(code_plmn)}`, function (data) {
+                if (data.exists) {
+                    $('#CodePlmnError').removeClass('text-success').addClass('text-danger').text('Invalide! Ce code PLMN existe déjà.');
+                } else {
+                    $('#CodePlmnError').removeClass('text-danger').addClass('text-success').text('Valide! Ce code PLMN peut être utilisé.');
+                }
+            });
+        });
+
+
+        $('#addOperateurForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let code_plmn = $('#mAddCode_PLMN').val();
+            let nom_op = $('#mmAddnom_op').val();
+            let mcc = $('#mAddMcc').val();
+            let mnc = $('#mAddMnc').val();
+            let pays = $('#mmAddPays').val();
+            let marketshare = $('#mAddmarkershare').val();
+            marketshare = marketshare === "" ? null : parseInt(marketshare);
+            let op_prefered = $('#mmAddOpPrefered').val();
+            let rna = $('#mmAddRNA').val();
+            let ra_terminated = $('#mmAddRaTerminated').val();
+            let code_groupe = $('#mmAddGrpName').val();
+            let typeOperateurId = $('#mAddTypeOp').val();
+            let typeAccordId = $('#mAddTypeAccord').val();
+            if (!code_plmn || !nom_op || !mcc || !mnc || !pays  || !op_prefered || !rna || !ra_terminated || !code_groupe || !typeOperateurId || !typeAccordId) {
+                alert('Tous les champs sont obligatoires.');
+                return;
+            }
+            console.log(code_plmn);
+            if (!isValidPLMN(code_plmn)) {
+                alert('Le code PLMN est invalide.');
+                return;
+            }
+            let operateur = $(this).serializeArray().reduce(function (obj, item) {
+                obj[item.name] = item.name === "Marketshare" && item.value === "" ? null : item.value;
+                return obj;
+            }, {});
+
+
+            $.ajax({
+                url: '/Manage/AddOperateur',
+                type: 'POST',
+                data: JSON.stringify(operateur),
+                contentType: 'application/json',
+                success: function (response) {
+                    $('#table_operateur').DataTable().draw(false);
+                    $('#messageAddOperateur').empty();
+                    $('#messageAddOperateur').removeClass().addClass('alert alert-success');
+                    $('#messageAddOperateur').text(response.message);
+                    $('#AddOPModal').modal('hide');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        // Clear previous errors
+                        $('#messageAddOperateur').empty();
+                        $('#messageAddOperateur').removeClass().addClass('alert alert-danger');
+                        jqXHR.responseJSON.message.forEach(function (error) {
+                            $('#messageAddOperateur').append('<p>' + error + '</p>');
+                        });
+                    }
+                }
+            });
+        });
+        setTimeout(function () {
+            $('#messageAddOperateur').empty();
+        }, 5000);
+        var modalOpenedOnce = false;
+        $('#updateOperateurForm').on('submit', function (e) {
+            e.preventDefault(); 
+     
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                url: '/Manage/UpdateOperateur', 
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        $('#table_operateur').DataTable().draw(false);
+                        $('#messageAddOperateur').empty();
+                        $('#messageAddOperateur').removeClass().addClass('alert alert-success');
+                        $('#messageAddOperateur').text(response.message);
+                        $('#modifyOPModal').modal('hide');
+                    } else {
+                        $('#messageAddOperateur').empty();
+                        $('#messageAddOperateur').removeClass().addClass('alert alert-danger');
+                        $('#messageAddOperateur').text(response.message);
+                        $('#modifyOPModal').modal('hide');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Handle any errors here
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        });
+
+        $('#AddOPModal').on('show.bs.modal', function () {
+            
+            if (!modalOpenedOnce) {
+                $.ajax({
+                    url: '/Manage/GetAllPays',
+                    method: 'GET',
+                    success: function (data) {
+                        const datalist = document.getElementById('countries');
+                        data.forEach(country => {
+                            const option = document.createElement('option');
+                            option.value = country.code_pays; 
+                            option.text = `${country.code_pays} - ${country.nom_pays}`;
+                            datalist.appendChild(option);
+                        });
+                    }
+                });
+                modalOpenedOnce = true;
+            }
+        });
+        $('#mmAddPays').on('change', function () {
+            var val = $(this).val();
+            var match = $('#countries option').filter(function () {
+                return this.value == val;
+            }).length;
+
+            if (match == 0) {
+                $('#countriesError').show();
+                $(this).val("");
+            } else {
+                $('#countriesError').hide();
+            }
+        });
+
+    </script>
+
+}

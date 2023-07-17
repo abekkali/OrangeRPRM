@@ -1,0 +1,46 @@
+trigger:
+- release
+pool:
+  name: 'Default'
+  
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+- task: DotNetCoreCLI@2
+  displayName: 'Build'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+- task: DotNetCoreCLI@2
+  displayName: 'Publish'
+  inputs:
+    command: 'publish'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(build.artifactStagingDirectory)'
+    artifactName: 'drop'
+- task: CopyFilesOverSSH@0
+  displayName: 'Copy Files Over SSH'
+  inputs:
+    sshEndpoint: 'Windows_Server_SSH'
+    sourceFolder: '$(Build.ArtifactStagingDirectory)'
+    targetFolder: '/path/to/target/folder/on/windows/server'
+    contents: '**'
+- task: SSH@0
+  displayName: 'Execute PowerShell Script'
+  inputs:
+    sshEndpoint: 'Windows_Server_SSH'
+    runOptions: 'commands'
+    commands: |
+      C:\path\to\target\folder\on\windows\server\run.bat

@@ -1,0 +1,403 @@
+﻿@using RPRM.Models.Metiers;
+@model List<ServiceOuvert>
+
+@{
+    ViewData["Title"] = "Orange -RPRM";
+    await Component.InvokeAsync("CheckPermission", new { className = "ServiceOuvert" });
+    var permissions = TempData["Permissions"] as dynamic;
+    bool hasViewPermission = permissions?.View ?? false;
+    bool hasEditPermission = permissions?.Edit ?? false;
+
+
+}
+<div class="modal fade" id="modifySerivceOuvertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier Serivce Ouvert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="updateSerivceOuvertForm" asp-controller="Manage" asp-action="UpdateSerivceOuvert" method="post" asp-anti-forgery="true">
+                <input type="hidden" name="code_service" id="mCode_Serivce_Hidden" />
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label for="role" class="col-md-2 col-lg-3 col-form-label">Code</label>
+                        <div class="col-md-4 col-lg-3">
+                            <input type="text" class="form-control" id="mcode_serivce" value="" disabled>
+                        </div>
+                        <label for="role" class="col-md-2 col-lg-2 col-form-label">PLMN</label>
+                        <div class="col-md-4 col-lg-4">
+                            <input type="text" class="form-control" id="mcode_plmn" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mDestination" class="col-md-4 col-lg-3 col-form-label">Destination</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Destination" type="text" class="form-control" id="mDestination" value="" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mnomService" class="col-md-4 col-lg-3 col-form-label">Nom Service</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mnomService" name="nomService" class="form-select" aria-label="Default" required>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Date Debut</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="dd" type="date" class="form-control" id="mdd" value="">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Date Fin</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="df" type="date" class="form-control" id="mdf" value="">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mDirection" class="col-md-4 col-lg-3 col-form-label">Direction</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mDirection" name="Direction" class="form-select" aria-label="Default" required>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addSerivceOuvertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter Serivce Ouvert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Manage" asp-action="AddSerivceOuvert" method="post" id="addSerivceOuvertForm" asp-anti-forgery="true">
+                <div class="modal-body">
+                    <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+                    <div class="row mb-3">
+                        <label for="plmnSelect" class="col-md-4 col-lg-3 col-form-label">Code PLMN </label>
+                        <div class="col-md-8 col-lg-9">
+                            <input class="form-select" list="plmnOptions" id="plmnSelect" name="Code_PLMN" required>
+                        <datalist id="plmnOptions">
+                        </datalist>
+                            <span id="plmnError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
+
+                       </div> 
+                    </div>
+                    <div class="row mb-3">
+                        <label for="maddDestination" class="col-md-4 col-lg-3 col-form-label">Destination</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Destination" type="text" class="form-control" id="maddDestination" value="" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mAddNomService" class="col-md-4 col-lg-3 col-form-label">Nom Serviced</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mAddNomService" name="Nom_Service_id" class="form-select" aria-label="Default" required>
+                                <option selected >Nom Service</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Date Debut</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="date_d" type="date" class="form-control" id="mAddDd" value="">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Date Fin</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="date_f" type="date" class="form-control" id="mAddDf" value="">
+                        </div>
+                    </div>
+                    
+                 
+                    <div class="row mb-3">
+                        <label for="mAddDirection" class="col-md-4 col-lg-3 col-form-label">Direction</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mAddDirection" name="Direction_id" class="form-select" aria-label="Default" required>
+                                <option selected>Direction</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<div class="pagetitle">
+    <h1>Gestion des services ouverts</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">Manager</li>
+            <li class="breadcrumb-item active">Serivce Ouvert</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Liste des services ouverts</h5>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (hasEditPermission)
+        {
+        <button type="submit" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addSerivceOuvertModal">Ajouter SerivceOuvert</button>
+        }
+        <div id="messageService"></div>
+    <form asp-controller="Manage" asp-action="DeleteSelected" method="post">
+            <table id="table_serviceouvert" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                        @if (hasEditPermission)
+                        {
+                            <th scope="col"></th>
+                        }
+                        <th scope="col">Code Service</th>
+                    <th scope="col">Code PLMN</th>
+                    <th scope="col">Nom Operateur</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Nom Service</th>
+                    <th scope="col">Date Debut</th>
+                    <th scope="col">Date Fin</th>
+                    <th scope="col">Direction</th>
+                        @if (hasEditPermission)
+                        {
+                            <th scope="col"></th>
+                        }
+                    </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        @if (hasEditPermission)
+            {
+            <input type="hidden" name="className" value="ServiceOuvert" />
+    <input type="checkbox"  id="selectAll" class="form-check-input" style="margin-top: 0.4em;margin-left: 0.45em;">
+     <label>Tout cocher</label><button type="submit" id="delete-btn-check" class="btn btn-sm btn-danger">Supprimer</button>
+    }
+    </form>
+    <br />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/site.js"></script>
+    <script>
+        var hasEditPermission = @Html.Raw(Json.Serialize(hasEditPermission));
+
+        $(document).ready(function () {
+            var columns = [
+                { data: "code_Service", name: "Code_Service" },
+                { data: "code_PLMN", name: "Code_PLMN" },
+                { data: "operateurName", name: "OperateurName" },
+                { data: "destination", name: "Destination" },
+                { data: "nomServiceLookup", name: "NomServiceLookup" },
+                { data: "date_d", name: "Date_D" },
+                { data: "date_f", name: "Date_F" },
+                { data: "directionLookup", name: "DirectionLookup" }
+            ];
+
+            if (hasEditPermission) {
+                columns.unshift({
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<input class="form-check-input" type="checkbox" name="selectedIds" value="${row.code_Service}">`;
+                    },
+                    orderable: false
+                });
+
+                columns.push({
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modifySerivceOuvertModal"
+                                        data-code-service="${row.code_Service}"
+                                        data-plmn="${row.code_PLMN}"
+                                        data-operateur-name="${row.operateurName}"
+                                        data-nom-service="${row.nomServiceLookup}"
+                                        data-dd="${row.date_d}"
+                                        data-df="${row.date_f}"
+                                        data-destination="${row.destination !== null ? row.destination : ''}"
+                                        data-direction="${row.directionLookup}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>`;
+                    },
+                    orderable: false
+                });
+            }
+
+            $('#table_serviceouvert').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "/api/GetServiceOuverts",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: function (d) {
+                        return JSON.stringify({
+                            "Draw": d.draw,
+                            "Start": d.start,
+                            "Length": d.length,
+                            "SearchValue": d.search.value,
+                            "OrderColumn": d.columns[d.order[0].column].name,
+                            "OrderDirection": d.order[0].dir
+                        });
+                    },
+                    dataSrc: function (json) {
+                        return json.data;
+                    }
+                },
+                columns: columns,
+                order: [[1, 'asc']]
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('modifySerivceOuvertModal');
+            const addmodal = document.getElementById('addSerivceOuvertModal');
+            const codeServiceHidden = document.getElementById('mCode_Serivce_Hidden');
+            const codeService = document.getElementById('mcode_serivce');
+            const codePLMN = document.getElementById('mcode_plmn');
+            const SericeNameSelect = document.getElementById('mnomService');
+            const DirectionSelect = document.getElementById('mDirection');
+            const Destination = document.getElementById('mDestination');
+            const addDestination = document.getElementById('addDestination');
+            const dd = document.getElementById('mdd');
+            const df = document.getElementById('mdf');
+            const AddDd = document.getElementById('mAddDd');
+            const AddDf = document.getElementById('mAddDf');
+
+            //console.log(AddDirectionSelect);
+            const AddSericeNameSelect = document.querySelector('#mAddNomService');
+            const AddDirectionSelect = document.querySelector('#mAddDirection');
+
+            // Vous pouvez également ajouter une vérification pour voir s'ils sont correctement initialisés
+            if (!AddSericeNameSelect || !AddDirectionSelect) {
+                console.error('Les éléments AddSericeNameSelect et/ou AddDirectionSelect ne sont pas initialisés correctement.');
+            }
+            fetchLookupData().then(function (data) {
+                populateLookupDropdown(data, "Nom_Service", "mAddNomService")
+                populateLookupDropdown(data, "Direction", "mAddDirection")
+                populateLookupDropdown(data, "Nom_Service", "mnomService");
+                populateLookupDropdown(data, "Direction", "mDirection");
+            }).catch(function (error) {
+                console.error('Error occurred while fetching lookup data:', error);
+            });
+
+            // Ensuite, vous pouvez ajouter l'écouteur d'événements
+            addmodal.addEventListener('show.bs.modal', function () {
+                loadPLMNCodes();
+            });
+            // Gestionnaire d'événements pour les boutons de modification
+            const tableService = document.getElementById('table_serviceouvert');
+            tableService.addEventListener('click', function (event) {
+                const button = event.target.closest('button[data-bs-target="#modifySerivceOuvertModal"]');
+                if (button) {
+                    // Récupérez les valeurs des attributs data-* et définissez-les pour les éléments du formulaire correspondants
+                    codePLMN.value = button.getAttribute('data-plmn');
+                    codeServiceHidden.value = button.getAttribute('data-code-service');
+                    codeService.value = button.getAttribute('data-code-service');
+                    dd.value = convertToDateInputValue(button.getAttribute('data-dd'));
+                    df.value = convertToDateInputValue(button.getAttribute('data-df'));
+                    Destination.value = button.getAttribute('data-destination');
+                    // Sélectionnez l'élément par défaut pour les champs de sélection
+                    selectDefaultOption(SericeNameSelect, button.getAttribute('data-nom-service'));
+                    selectDefaultOption(DirectionSelect, button.getAttribute('data-direction'));
+
+                }
+            });
+
+        });
+        $("#addSerivceOuvertForm").submit(function (event) {
+            event.preventDefault();
+            submitForm();
+        });
+
+        function submitForm() {
+            var form = $("#addSerivceOuvertForm")[0];
+            var formData = new FormData(form);
+
+            $.ajax({
+                url: form.action,
+                type: form.method,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.success) {
+                        $('#addSerivceOuvertModal').modal('hide');
+                        $('#table_serviceouvert').DataTable().draw(false);
+                        $('#messageService').empty();
+                        $('#messageService').removeClass().addClass('alert alert-success');
+                        $('#messageService').text(data.message);
+                    } else {
+                        // Si l'opération a échoué, affichez le message d'erreur
+                        $('#messageService').empty();
+                        $('#messageService').removeClass().addClass('alert alert-danger');
+                        $('#messageService').text(data.message);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Gérer les erreurs ici
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        }
+        $("#updateSerivceOuvertForm").on("submit", function (event) {
+            event.preventDefault();
+
+            let form = $(this);
+            let url = form.attr("action");
+            let formData = form.serialize();
+
+            $.ajax({
+                url: url,
+                data: formData,
+                type: 'POST',
+                success: function (response) {
+                    if (response.success) {
+                        $('#table_serviceouvert').DataTable().draw(false);
+                        $('#messageService').empty();
+                        $('#messageService').removeClass().addClass('alert alert-success');
+                        $('#messageService').text(response.message);
+                        $('#modifySerivceOuvertModal').modal('hide');
+                    } else {
+                        $('#messageService').empty();
+                        $('#messageService').removeClass().addClass('alert alert-danger');
+                        $('#messageService').text(response.message);
+                    }
+                },
+                error: function (error) {
+                    alert("Erreur lors de l'envoi de la demande. Réessayez plus tard.");
+                }
+            });
+        });
+
+
+        $(document).ready(function () {
+            $('#table_serviceouvert').DataTable();
+        });
+   
+        </script>
+    
+}

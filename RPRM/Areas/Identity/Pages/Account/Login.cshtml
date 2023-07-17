@@ -1,0 +1,87 @@
+﻿@page
+@using RPRM.Areas.Identity.Pages.Account;
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in - RPRM";
+}
+
+
+<form id="account" method="post" class="row g-3 needs-validation" novalidate>
+  
+    <div class="card mb-3">
+        
+        <div class="card-body">
+            <div class="pt-4 pb-2">
+                <div class="card-title text-center">
+                    <img src="~/assets/img/logo.png" alt="Orange" style="width:80px;">
+                </div>
+            
+                <h5 class="card-title text-center pb-0 fs-4">@ViewData["Title"]</h5>
+                
+            </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="col-12">
+                <label for="Input_Email" class="form-label">Email</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text" id="inputGroupPrepend">E-mail</span>
+                    <input asp-for="Input.Email" class="form-control" id="Input_Email" autocomplete="username" aria-required="true" placeholder="prenom.nom@orange.com" required />
+                    <div class="invalid-feedback">Veuillez entrer votre nom d'utilisateur.</div>
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12">
+    <label for="Input_Password" class="form-label">Mot de passe</label>
+    <div class="input-group">
+        <input type="password" asp-for="Input.Password" class="form-control pwd-input" id="Input_Password" autocomplete="current-password" aria-required="true" placeholder="mot de passe" required />
+        <button id="togglePassword" type="button" class="btn btn-light btn-show-pass"><i class="bi bi-eye"></i></button>
+        <div class="invalid-feedback">Veuillez entrer votre mot de passe!</div>
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+</div>
+
+
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="Input.RememberMe" id="rememberMe" />
+                    <label class="form-check-label" for="rememberMe">Se souvenir de moi</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary w-100" type="submit">Connexion</button>
+            </div>
+            <div class="col-12">
+                <p class="small mb-0">Vous n'avez pas de compte ? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Créer un compte</a></p>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    @("@media (min-width: 1200px) {")
+        #main,
+        #footer {
+            margin-right: 300px;
+        }
+    }
+</style>
+@section Scripts {
+ <script>
+     var togglePassword = document.querySelector('#togglePassword');
+var passwordField = document.querySelector('#Input_Password');
+
+togglePassword.addEventListener('click', function (e) {
+    // bascule le type d'input
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        togglePassword.innerHTML = '<i class="bi bi-eye-slash"></i>';
+    } else {
+        passwordField.type = "password";
+        togglePassword.innerHTML = '<i class="bi bi-eye"></i>';
+    }
+});
+
+ </script>
+    <partial name="_ValidationScriptsPartial" />
+
+}

@@ -1,0 +1,596 @@
+﻿@using RPRM.Models.Metiers;
+@model List<Tarif>
+
+@{
+    ViewData["Title"] = "Orange -RPRM";
+    await Component.InvokeAsync("CheckPermission", new { className = "Tarif" });
+    var permissions = TempData["Permissions"] as dynamic;
+    bool hasViewPermission = permissions?.View ?? false;
+    bool hasEditPermission = permissions?.Edit ?? false;
+
+
+}
+
+<div class="pagetitle">
+    <h1>Gestion des Tarifs</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">Manager</li>
+            <li class="breadcrumb-item active">Tarifs</li>
+        </ol>
+    </nav>
+</div>
+<!-- Modal AddTarif -->
+<div class="modal fade" id="addTarifModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter Groupe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addTarifForm" asp-controller="Manage" asp-action="AddTarif" method="post" >
+                <div class="modal-body">
+                    <div id="modaltarifmessage"></div>
+                    <div class="row mb-3">
+                        <label for="plmnSelect" class="col-md-4 col-lg-3 col-form-label">Code PLMN </label>
+                        <div class="col-md-8 col-lg-9">
+                            <input class="form-select" list="plmnOptions" id="plmnSelect" name="Code_PLMN" required>
+                            <datalist id="plmnOptions">
+                            </datalist>
+                            <span id="plmnError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Date Debut</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="date_d" type="date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Date fin</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="date_f" type="date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="trafficType" class="col-md-4 col-lg-3 col-form-label">Type Trafic</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select class="form-select" id="trafficType" name="Type_Trafic_id" required>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="tarifType" class="col-md-4 col-lg-3 col-form-label">Type Tarif</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select class="form-select" id="tarifType" name="Type_Tarif_id" required>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-3">
+                        <label for="increment" class="col-md-4 col-lg-3 col-form-label">Increment</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select class="form-select" id="increment" name="Increment_id" required>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="exchangeRate" class="col-md-4 col-lg-3 col-form-label">Exchange Rate</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input type="number" id="exchangeRate" name="Exchange_rate" step="0.000001" min="0" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="rate" class="col-md-4 col-lg-3 col-form-label">Rate</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input type="number" id="rate" name="Rate" step="0.000001" min="0" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="commentaire" class="col-md-4 col-lg-3 col-form-label">Commentaire</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input type="text" id="commentaire" name="Commentaire" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="direction" class="col-md-4 col-lg-3 col-form-label">Direction</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select class="form-select" id="direction" name="Direction_id" required>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="autoRenewal" class="col-md-4 col-lg-3 col-form-label">Auto Renewal</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select class="form-select" id="autoRenewal" name="Auto_Renwal">
+                                <option value="oui">Oui</option>
+                                <option value="non">Non</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="addcurrency" class="col-md-4 col-lg-3 col-form-label">Devise</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input class="form-control currency-input" list="currencyList" id="addcurrency" name="Devis" required>
+                            <datalist id="currencyList">
+                            </datalist>
+                            <span id="devisError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<!-- Modal ModifyTarif -->
+<div class="modal fade" id="modifytarifModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier Tarif</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="modifyTarifForm" asp-controller="Manage" asp-action="ModifyTarif" method="post">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mtarifCode" class="col-form-label">Code Tarif</label>
+                            <input class="form-control" id="mtarifCode" name="Code_Tarif" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mplmnSelectModify" class="col-form-label">Code PLMN</label>
+                            <input class="form-control" id="mplmnSelectModify" name="Code_PLMN" disabled>
+                        </div>
+                    </div>
+                    <input type="hidden" name="Code_Tarif" id="mtarifCode2" value="" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mdateDebut" class="col-form-label">Date Debut</label>
+                            <input name="date_d" type="date" class="form-control" id="mdateDebut">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mdateFin" class="col-form-label">Date fin</label>
+                            <input name="date_f" type="date" class="form-control" id="mdateFin">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mtrafficType" class="col-form-label">Type Trafic</label>
+                            <select class="form-select" id="mtrafficType" name="Type_Trafic_id" required>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mtarifType" class="col-form-label">Type Tarif</label>
+                            <select class="form-select" id="mtarifType" name="Type_Tarif_id" required>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mincrement" class="col-form-label">Increment</label>
+                            <select class="form-select" id="mincrement" name="Increment_id" required>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mexchangeRate" class="col-form-label">Exchange Rate</label>
+                            <input type="number" id="mexchangeRate" name="Exchange_rate" step="0.000001" min="0" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mrate" class="col-form-label">Rate</label>
+                            <input type="number" id="mrate" name="Rate" step="0.000001" min="0" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mcommentaire" class="col-form-label">Commentaire</label>
+                            <input type="text" id="mcommentaire" name="Commentaire" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="mdirection" class="col-form-label">Direction</label>
+                            <select class="form-select" id="mdirection" name="Direction_id" required>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mautoRenewal" class="col-form-label">Auto Renewal</label>
+                            <select class="form-select" id="mautoRenewal" name="Auto_Renwal" required>
+                                <option value="oui">Oui</option>
+                                <option value="non">Non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mcurrency" class="col-md-4 col-lg-3 col-form-label">Devise</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input class="form-control currency-input" list="currencyList" id="mcurrency" name="Devis" required>
+                            <datalist id="currencyList">
+                            </datalist>
+                            <span id="devisError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div id="TarifMessage"></div>
+        <h5 class="card-title">Liste des Tarifs</h5>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (ViewBag.modelerr != null)
+        {
+            <div id="errorMessage" class="alert alert-danger">@ViewBag.modelerr</div>
+
+        }
+        @if (hasEditPermission)
+        {
+            <button type="submit" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addTarifModal">Ajouter Tarif</button>
+        }
+        <form asp-controller="Manage" asp-action="DeleteSelected" method="post">
+            <table id="table_tarif" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        @if (hasEditPermission)
+                        {
+                            <th scope="col"></th>
+                        }
+                        <th scope="col">Code Plmn</th>
+                        <th scope="col">Type Trafic</th>
+                        <th scope="col">Type Tarif</th>
+                        <th scope="col">Date Debut</th>
+                        <th scope="col">Date Fin</th>
+                        <th scope="col">Inc</th>
+                        <th scope="col">Exchange Rate</th>
+                        <th scope="col">Rate</th>
+                        <th scope="col">Commentaire</th>
+                        <th scope="col">Direction</th>
+                        <th scope="col">Auto Renwal</th>
+                        <th scope="col">Devise</th>
+                        @if (hasEditPermission)
+                        {
+                            <th scope="col">Action</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+@*                    @foreach (var tarif in Model)
+                    {
+
+                        <tr>
+                            @if (hasEditPermission)
+                            {
+                                <td><input class="form-check-input" type="checkbox" name="selectedIds" value="@tarif.Code_Tarif"></td>
+                            }
+                            <td>@tarif.Code_PLMN</td>
+                            <td>@tarif.TypeTraficLookup.Value</td>
+                            <td style="white-space: nowrap;">@tarif.TypeTarifLookup.Value</td>
+                            @{
+                                string dd = string.Format("{0:dd/MM/yyyy}", tarif.Date_d);
+                                string df = string.Format("{0:dd/MM/yyyy}", tarif.Date_f);
+                            }
+                            <td style="white-space: nowrap;">@dd</td>
+                            <td style="white-space: nowrap;">@df</td>
+                            <td>@tarif.IncrementLookup.Value</td>
+                            <td style="white-space: nowrap;">@(tarif.Exchange_rate.HasValue ? tarif.Exchange_rate.Value.ToString("0.#########") : "")</td>
+                            <td style ="white-space: nowrap;">@(tarif.Rate.HasValue ? tarif.Rate.Value.ToString("0.#########") : "")</td>
+                            <td>@tarif.Commentaire</td>
+                            <td>@tarif.DirectionLookup.Value</td>
+                            <td>@tarif.Auto_Renwal</td>
+                            <td>@tarif.Devis</td>
+                                @if (hasEditPermission)
+                            {
+                             <td>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modifytarifModal" data-code-tarif="@tarif.Code_Tarif" data-devis="@tarif.Devis"
+                                        data-plmn="@tarif.Code_PLMN" data-typetrafic="@tarif.TypeTraficLookup.Id" data-typetarif="@tarif.TypeTarifLookup.Id" data-dd="@dd" data-df="@df" data-renwal="@tarif.Auto_Renwal"
+                                        data-increment="@tarif.IncrementLookup.Id" data-exchange="@tarif.Exchange_rate" data-rate="@tarif.Rate" data-commentaire="@tarif.Commentaire" data-direction="@tarif.DirectionLookup.Id">
+                                <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>           
+                            }
+                            
+                        </tr>
+                    }
+*@                </tbody>
+            </table>
+            @if (hasEditPermission)
+            {
+                <input type="hidden" name="className" value="Tarif" />
+                <input type="checkbox" id="selectAll" class="form-check-input" style="margin-top: 0.4em;margin-left: 0.45em;">
+                <label>Tout cocher</label>
+                   <button type= "submit" id = "delete-btn-check" class="btn btn-sm btn-danger">Supprimer</button>
+            }   
+        </form>
+        <br />
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var hasEditPermission = @Html.Raw(Json.Serialize(hasEditPermission));
+
+        console.log(hasEditPermission);
+        $(document).ready(function () {
+            var columns = [
+                { data: "code_PLMN", name: "code_PLMN" },
+                { data: "typeTrafic", name: "typeTrafic" },
+                { data: "typeTarif", name: "typeTarif" },
+                { data: "dateDebut", name: "dateDebut" },
+                { data: "dateFin", name: "dateFin" },
+                { data: "increment", name: "increment" },
+                { data: "exchangeRate", name: "exchangeRate" },
+                { data: "rate", name: "rate" },
+                { data: "commentaire", name: "commentaire" },
+                { data: "direction", name: "direction" },
+                { data: "autoRenwal", name: "autoRenwal" },
+                { data: "devise", name: "devise" }
+            ];
+
+            if (hasEditPermission) {
+                columns.unshift({
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<input class="form-check-input" type="checkbox" name="selectedIds" value="${row.code_Tarif}">`;
+                    },
+                    orderable: false
+                });
+
+                columns.push({
+                    data: null,
+                    render: function (data, type, row) {
+                        return `<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modifytarifModal"
+                                data-code-tarif="${row.code_Tarif}"
+                                data-devis="${row.devise}"
+                                data-plmn="${row.code_PLMN}"
+                                data-typetrafic="${row.typeTrafic}"
+                                data-typetarif="${row.typeTarif}"
+                                data-dd="${row.dateDebut}"
+                                data-df="${row.dateFin}"
+                                data-renwal="${row.autoRenwal}"
+                                data-increment="${row.increment}"
+                                data-exchange="${row.exchangeRate}"
+                                data-rate="${row.rate}"
+                                data-commentaire="${row.commentaire}"
+                                data-direction="${row.direction}">
+                                <i class="bi bi-pencil"></i>
+                            </button>`;
+                    },
+                    orderable: false
+                });
+            }
+
+            $('#table_tarif').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "/api/GetTarifs",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: function (d) {
+                        return JSON.stringify({
+                            "Draw": d.draw,
+                            "Start": d.start,
+                            "Length": d.length,
+                            "SearchValue": d.search.value,
+                            "OrderColumn": d.columns[d.order[0].column].name,
+                            "OrderDirection": d.order[0].dir
+                        });
+                    },
+                    dataSrc: function (json) {
+                        json.draw = json.draw;
+                        json.recordsTotal = json.recordsTotal;
+                        json.recordsFiltered = json.recordsFiltered;
+                        json.data = json.data;
+                        return json.data;
+                    }
+                },
+                columns: columns
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#table_tarif').DataTable();
+            loadPLMNCodes();
+            fetchLookupData().then(function (lookupData) {
+                populateLookupDropdown(lookupData, 'Type_Trafic', 'trafficType');
+                populateLookupDropdown(lookupData, 'Type_tarif', 'tarifType');
+                populateLookupDropdown(lookupData, 'Increment', 'increment');
+                populateLookupDropdown(lookupData, 'Direction', 'direction');
+                // Pour modifier le tarif
+                populateLookupDropdown(lookupData, 'Type_Trafic', 'mtrafficType');
+                populateLookupDropdown(lookupData, 'Type_tarif', 'mtarifType');
+                populateLookupDropdown(lookupData, 'Increment', 'mincrement');
+                populateLookupDropdown(lookupData, 'Direction', 'mdirection');
+            }).catch(function (error) {
+                console.error("Une erreur s'est produite lors de la récupération des données LookupTable : ", error);
+            });
+            var mTarif = $('#TarifMessage');
+
+            function populateCurrencyDatalist(currencies) {
+                let datalist = document.getElementById('currencyList');
+                datalist.innerHTML = '';
+                currencies.forEach(function (currency) {
+                    let option = document.createElement('option');
+                    option.value = currency.currency_iso_3_char_code;
+                    option.label = currency.currency_name;
+                    datalist.appendChild(option);
+                });
+            }
+
+            function loadCurrenciesFromFile() {
+                return fetch('/iso.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('error to fetch currencies.');
+                        }
+                        return response.json();
+                    })
+                    .then(currencies => {
+                        return currencies.reduce((unique, currency) => {
+                            if (!unique.some(c => c.currency_iso_3_char_code === currency.currency_iso_3_char_code)) {
+                                unique.push(currency);
+                            }
+                            return unique;
+                        }, []);
+                    })
+                    .catch(error => console.error(" error occurred while fetching currencies: ", error));
+            }
+            loadCurrenciesFromFile().then(currencies => {
+                populateCurrencyDatalist(currencies);
+                let currencyInputs = document.querySelectorAll('.currency-input');
+                currencyInputs.forEach(input => {
+                    input.addEventListener('change', function () {
+                        let currencyCode = input.value;
+                        let isValid = currencies.some(currency => currency.currency_iso_3_char_code === currencyCode);
+                        if (!isValid) {
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+                });
+            });
+
+            $("#addTarifForm").on('submit', function (event) {
+                event.preventDefault();
+                let isValidForm = true;
+                let codePLMN = $("#Code_PLMN").val();
+                let typeTraficId = $("#Type_Trafic_id").val();
+                let typeTarifId = $("#Type_Tarif_id").val();
+                let exchangeRate = $("#exchangeRate").val();
+                let rate = $("#rate").val();
+                let date_d = $("input[name='date_d']").val();
+                let date_f = $("input[name='date_f']").val();
+                let increment_id = $("#increment").val();
+                let direction_id = $("#direction").val();
+                let autoRenewal = $("#autoRenewal").val();
+                let devis = $("#currency").val();
+
+                if (codePLMN == "" || typeTraficId == "" || typeTarifId == "" || increment_id == "" || direction_id == "" || devis == "") {
+                    $('#modaltarifmessage').removeClass().addClass('alert alert-danger').text("Veuillez remplir tous les champs requis.");
+                    isValidForm = false;
+                }
+
+                if (isValidForm) {
+                    $.ajax({
+                        url: '/Manage/AddTarif',
+                        type: 'POST',
+                        data: new FormData(this),
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            mTarif.empty();
+                            if (response.success) {
+                                mTarif.removeClass().addClass('alert alert-success');
+                                mTarif.text(response.message);
+                            } else {
+                                mTarif.removeClass().addClass('alert alert-danger');
+                                mTarif.text(response.message);
+                            }
+                        },
+                        error: function (error) {
+                            console.log("Error:", error);
+                        }
+                    });
+                    $('#addTarifModal').modal('hide');
+                }
+            });
+            $("#modifyTarifForm").on('submit', function (event) {
+                event.preventDefault();
+                    $.ajax({
+                        url: '/Manage/ModifyTarif',
+                        type: 'POST',
+                        data: new FormData(this),
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            mTarif.empty();
+                            if (response.success) {
+                                mTarif.removeClass().addClass('alert alert-success');
+                                mTarif.text(response.message);
+                            } else {
+                                mTarif.removeClass().addClass('alert alert-danger');
+                                mTarif.text(response.message);
+                            }
+                        },
+                        error: function (error) {
+                            console.log("Error:", error);
+                        }
+                    });
+                $('#modifytarifModal').modal('hide');
+            });
+
+            $('#modifytarifModal').on('show.bs.modal', function (event) {          
+                var button = $(event.relatedTarget); 
+                var codeTarif = button.data('code-tarif');
+                var codePLMN = button.data('plmn');
+                var dateDebut = button.data('dd');
+                var dateFin = button.data('df');
+                var devis = button.data('devis');
+                var typeTrafic = button.data('typetrafic');
+                var typeTarif = button.data('typetarif');
+                var renwal = button.data('renwal');
+                var increment = button.data('increment');
+                var exchangeRate = button.data('exchange');
+                var rate = button.data('rate');
+                var commentaire = button.data('commentaire');
+                var direction = button.data('direction');
+                // Remplir les champs de la modal avec les valeurs récupérées
+                var modal = $(this);
+                modal.find('#mtarifCode').val(codeTarif);
+                modal.find('#mtarifCode2').val(codeTarif);
+                modal.find('#mplmnSelectModify').val(codePLMN);
+                modal.find('#mdateDebut').val(convertToDateInputValue(dateDebut));
+                modal.find('#mdateFin').val(convertToDateInputValue(dateFin));
+                modal.find('#mcurrency').val(devis);
+                modal.find('#mtrafficType').val(typeTrafic);
+                modal.find('#mtarifType').val(typeTarif);
+                modal.find('#mautoRenewal').val(renwal);
+                modal.find('#mincrement').val(increment);
+                modal.find('#mexchangeRate').val(typeof exchangeRate === 'string' ? parseFloat(exchangeRate.replace(',', '.')) : exchangeRate);
+                modal.find('#mrate').val(typeof rate === 'string' ? parseFloat(rate.replace(',', '.')) : rate);
+                modal.find('#mcommentaire').val(commentaire);
+                modal.find('#mdirection').val(direction);
+                //$('#mcurrency').attr('placeholder', currencies[devis]);
+                //$('#mcurrency').attr('title', currencies[devis]);
+
+
+                $('#mtrafficType option[value="' + typeTrafic + '"]').prop('selected', true);
+                $('#mtarifType option[value="' + typeTarif + '"]').prop('selected', true);
+                $('#mincrement option[value="' + increment + '"]').prop('selected', true);
+                $('#mdirection option[value="' + direction + '"]').prop('selected', true);
+
+            });
+        });
+
+
+    </script>
+
+}

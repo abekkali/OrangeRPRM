@@ -1,0 +1,19 @@
+trigger:
+- release
+pool:
+  name: 'Default'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  
+steps:  
+- task: SSH@0
+  displayName: 'Execute PowerShell Script'
+  inputs:
+    sshEndpoint: 'Windows_Server_SSH'
+    runOptions: 'commands'
+    commands: |
+      C:\path\to\target\folder\on\windows\server\run.bat
+      

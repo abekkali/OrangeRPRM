@@ -1,0 +1,106 @@
+﻿@model RPRM.Models.Metiers.DocOperateur
+
+@{
+    ViewData["Title"] = "Orange - RPRM";
+}
+<div class="pagetitle">
+    <h1>Importer</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Importer Document</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+<div class="card">
+    <div class="card-body">
+        <div id="DocMessage"></div>
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="Code_PLMN">Code PLMN</label>
+                <input class="form-select" list="plmnOptions" id="plmnSelect" name="Code_PLMN" required>
+                <datalist id="plmnOptions">
+                </datalist>
+                <span id="plmnError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
+
+            </div>
+            <div class="form-group mt-3">
+                <label for="Type_Doc">Type Document</label>
+                @Html.DropDownListFor(m => m.Type_Doc_id, (IEnumerable<SelectListItem>)ViewBag.DocTypes, "Sélectionnez un type Document", new { @class = "form-control", @required = "required" })
+            </div>
+            <div class="form-group mt-3">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="date_d">Date de début</label>
+                        @Html.TextBoxFor(m => m.date_d, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+                    <div class="col-6">
+                        <label for="date_f">Date de fin</label>
+                        @Html.TextBoxFor(m => m.date_f, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <label for="Document">Document</label>
+                <input type="file" id="Document" name="Document" class="form-control form-control-lg" required>
+            </div>
+
+            <button id="submitButton" class="btn btn-primary mt-4" type="submit">
+                <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                Importer
+            </button>
+        </form>
+
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function showMessage(message, className) {
+            var messageElement = $('<div>').addClass('alert ' + className).text(message);
+            $('#messageContainer').append(messageElement);
+            setTimeout(function () {
+                messageElement.remove();
+            }, 5000);
+        }
+
+        function hideMessages() {
+            $('#messageContainer').empty();
+        }
+        $(document).ready(function () {
+            loadPLMNCodes();
+
+            $('#uploadForm').on('submit', function (event) {
+                event.preventDefault();
+                var mDoc = $('#DocMessage');
+                $.ajax({
+                    url: '/Import/Document',
+                    type: 'POST',
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        $('#submitButton').prop('disabled', true);
+                        $('#spinner').show();
+                    },
+                    success: function (response) {
+                        mDoc.empty();
+                        if (response.success) {
+                            mDoc.removeClass().addClass('alert alert-success');
+                            mDoc.text(response.message);
+                        } else {
+                            mDoc.removeClass().addClass('alert alert-danger');
+                            mDoc.text(response.message);
+                        }                  
+                    },
+                    complete: function () {
+                        $('#submitButton').prop('disabled', false);
+                        $('#spinner').hide();
+                    }
+                });
+            });
+        });
+
+
+    </script>
+    }

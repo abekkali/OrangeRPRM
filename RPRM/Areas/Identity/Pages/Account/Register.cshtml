@@ -1,0 +1,87 @@
+﻿@page
+@model RegisterModel
+
+@{
+    ViewData["Title"] = "Register - RPRM";
+}
+
+<form id="account" method="post" class="row g-3 needs-validation" novalidate>
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="pt-4 pb-2">
+                <div class="card-title text-center">
+                    <img src="~/assets/img/logo.png" alt="Orange" style="width:80px;">
+                </div>
+                <h5 class="card-title text-center pb-0 fs-4">@ViewData["Title"]</h5>
+            </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="col-12">
+                <label for="Input_Email" class="form-label">Adresse e-mail</label>
+                <input asp-for="Input.Email" class="form-control" id="Input_Email" autocomplete="email" aria-required="true" required />
+                <div class="invalid-feedback">Veuillez entrer votre adresse e-mail.</div>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label for="Input_Password" class="form-label">Mot de passe</label>
+                <div class="input-group">
+                    <input type="password" asp-for="Input.Password" class="form-control pwd-input" id="Input_Password" autocomplete="current-password" aria-required="true" required />
+                    <button type="button" class="btn btn-light pwd-toggle"><i class="bi bi-eye"></i></button>
+                    <div class="invalid-feedback">Veuillez entrer votre mot de passe!</div>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12">
+                <label for="Input_ConfirmPassword" class="form-label">Confirmer le mot de passe</label>
+                <div class="input-group">
+                    <input type="password" asp-for="Input.ConfirmPassword" class="form-control pwd-input" id="Input_ConfirmPassword" autocomplete="current-password" aria-required="true" required />
+                    <button type="button" class="btn btn-light pwd-toggle"><i class="bi bi-eye"></i></button>
+                    <div class="invalid-feedback">Veuillez confirmer votre mot de passe!</div>
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <label></label>
+                <button class="btn btn-primary w-100" type="submit">S'inscrire</button>
+            </div>
+            <div class="col-12">
+                <p class="small mb-0">Vous avez déjà un compte ? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+@section Scripts {
+  <style>
+    @("@media (min-width: 1200px) {")
+        #main,
+        #footer {
+            margin-right: 300px;
+        }
+    @("}")
+
+</style>
+<script>
+var toggleButtons = document.querySelectorAll('.pwd-toggle');
+
+toggleButtons.forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        // Le champ de mot de passe associé est le premier élément enfant du parent de btn
+        var passwordField = btn.parentElement.querySelector('.pwd-input');
+
+        // bascule le type d'input
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            btn.innerHTML = '<i class="bi bi-eye-slash"></i>'; // change l'icône de l'œil
+        } else {
+            passwordField.type = "password";
+            btn.innerHTML = '<i class="bi bi-eye"></i>'; // change l'icône de l'œil
+        }
+    });
+});
+
+</script>
+    <partial name="_ValidationScriptsPartial" />
+}

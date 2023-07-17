@@ -1,0 +1,264 @@
+﻿<div class="modal fade" id="modifyOPModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier Operateur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="updateOperateurForm" asp-controller="Manage" asp-action="UpdateOperateur" method="post" asp-anti-forgery="true">
+                <input type="hidden" name="code_plmn" id="mcode_plmn_Hidden" />
+                <div class="modal-body">
+                    <div id="messageopIndex"></div>
+                    <div class="row mb-3">
+                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Code PLMN</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="code_plmn" type="text" class="form-control" id="mcode_plmn_disabled" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mnom_op" class="col-md-4 col-lg-3 col-form-label">Nom Operateur</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="nom_op" type="text" class="form-control" id="mnom_op" value="" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mMarketshare" class="col-md-4 col-lg-3 col-form-label">Marketshare</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Marketshare" type="number" min="0" class="form-control" id="mMarketshare" value="" >
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mOpPrefered" class="col-md-4 col-lg-3 col-form-label">Op Prefered</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mOpPrefered" name="OpPrefered" class="form-select" aria-label="Default" required>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mRNA" class="col-md-4 col-lg-3 col-form-label">RNA</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mRNA" name="RNA" class="form-select" aria-label="Default" required>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mRaTerminated" class="col-md-4 col-lg-3 col-form-label">Ra Terminated</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mRaTerminated" name="RaTerminated" class="form-select" aria-label="Default" required>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mGrpName" class="col-md-4 col-lg-3 col-form-label">Nom Groupe</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mGrpName" name="GrpName" class="form-select" aria-label="Default" required>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mTypeOp" class="col-md-4 col-lg-3 col-form-label">Type Operateur</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mTypeOp" name="TypeOp" class="form-select" aria-label="Default" required>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mTypeAccord" class="col-md-4 col-lg-3 col-form-label">Type Accord</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mTypeAccord" name="TypeAccord" class="form-select" aria-label="Default" required>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="AddOPModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un Operateur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addOperateurForm" asp-controller="Manage" asp-action="AddOperateur" method="post" asp-anti-forgery="true">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label for="mAddCode_PLMN" class="col-md-4 col-lg-3 col-form-label">Code PLMN</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Code_PLMN" type="text" class="form-control" id="mAddCode_PLMN" value="" required>
+                            <div id="CodePlmnError" class="text-danger"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label for="mmAddnom_op" class="col-md-4 col-lg-3 col-form-label">Nom Operateur</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Nom_Op" type="text" class="form-control" id="mmAddnom_op" value="" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mAddMcc" class="col-md-4 col-lg-3 col-form-label">MCC</label>
+                        <div class="col-md-4 col-lg-4">
+                            <input id="mAddMcc" name="MCC" type="number" maxlength="3" class="form-control" pattern="\d{1,3}" title="Veuillez entrer un nombre de maximum 3 chiffres" value="" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value.length > 3) this.value = this.value.slice(0, 3);" required>
+                        </div>
+                        <label for="mAddMnc" class="col-md-2 col-lg-2 col-form-label">MNC</label>
+                        <div class="col-md-3 col-lg-3">
+                            <input id="mAddMnc" name="MNC" type="number" maxlength="3" class="form-control" pattern="\d{2,3}" title="Veuillez entrer un nombre de 2 ou 3 chiffres" value="" oninput="this.value = this.value.replace(/[^0-9]/g, '');if(this.value.length > 3) this.value = this.value.slice(0, 3);" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mmAddPays" class="col-md-4 col-lg-3 col-form-label">Pays</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input class="form-select" list="countries" id="mmAddPays" name="Code_pays" required>
+                            <datalist id="countries">
+                            </datalist>
+                            <span id="countriesError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
+
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mAddmarkershare" class="col-md-4 col-lg-3 col-form-label">Marketshare</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input id="mAddmarkershare" name="Marketshare" type="number" min="0" class="form-control" pattern="\d+(\.\d{1,2})?" title="Veuillez entrer un nombre" value="" >
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mmAddOpPrefered" class="col-md-4 col-lg-3 col-form-label">Op Prefered</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mmAddOpPrefered" name="Op_prefered" class="form-select" aria-label="Default" required>
+                                <option value="" selected>Veuillez choisir une option.</option>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mmAddRNA" class="col-md-4 col-lg-3 col-form-label">RNA</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mmAddRNA" name="RNA" class="form-select" aria-label="Default" required>
+                                <option value="" selected>Veuillez choisir une option.</option>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mmAddRaTerminated" class="col-md-4 col-lg-3 col-form-label">Ra Terminated</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mmAddRaTerminated" name="RA_Teminated" class="form-select" aria-label="Default" required>
+                                <option value="" selected>Veuillez choisir une option.</option>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mmAddGrpName" class="col-md-4 col-lg-3 col-form-label">Nom Groupe</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mmAddGrpName" name="Code_Groupe" class="form-select" aria-label="Default" required>
+                                <option value ="" selected>Choisir un Groupe</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mAddTypeOp" class="col-md-4 col-lg-3 col-form-label">Type Operateur</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mAddTypeOp" name="TypeOperateurId" class="form-select" aria-label="Default" required>
+                                <option value="" selected>Choisir un Type Operateur</option>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mAddTypeAccord" class="col-md-4 col-lg-3 col-form-label">Type Accord</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mAddTypeAccord" name="TypeAccordId" class="form-select" aria-label="Default" required>
+                                <option value="" selected>Choisir un Type Accord</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="ModalFile" tabindex="-1" role="dialog" aria-labelledby="DocumentModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">Visualisation du document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <object id="fileObject" data="" type="application/pdf" width="100%" height="600px">
+                    <embed src="" type="application/pdf">
+                    <p><a id="fileDownloadLink" href="">Cliquez ici pour télécharger le fichier</a></p>
+                    </embed>
+                </object>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="plmnByGroupe" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="max-height: 600px;">
+            <div class="modal-header">
+                <h5 class="modal-title">Groupes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+                <input type="hidden" name="code_plmn" id="mcode_plmn_Hidden" />
+            <div class="modal-body" style=" overflow-y: auto;">
+                <input type="text" id="searchInput" placeholder="Rechercher..." class="form-control mb-3">
+                <table id="table_groupeByPLmn" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">PLMN</th>
+                            <th scope="col">Nom Operateur</th>
+                            <th scope="col">Pays</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#table_groupeByPLmn').DataTable();
+        });
+     
+    </script>
+
+}

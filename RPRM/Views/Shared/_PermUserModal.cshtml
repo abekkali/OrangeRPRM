@@ -1,0 +1,41 @@
+﻿@{
+}
+<div class="modal fade" id="droitUser" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Permission </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="updatePermForm" asp-controller="Users" asp-action="UpdatePerm" method="post" asp-anti-forgery="true">
+                <input type="hidden" name="userId" id="userId" value="" />
+                <div class="modal-body">
+                    <table style="width:100%">
+                        @for (int i = 0; i < Model.ClassNames.Count; i++)
+                        {
+                            <tr>
+                                <td>@Model.ClassNames[i]</td>
+                                <td>
+                                    <input type="checkbox" name="permissions[@i].CanView" class="form-check-input canview" data-classname="@Model.ClassNames[i]" data-permissiontype="view" value="true" />
+                                    <input type="hidden" name="permissions[@i].CanView" value="false" />
+                                    <label>Lecture</label>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="permissions[@i].CanEdit" class="form-check-input canedit" data-classname="@Model.ClassNames[i]" data-permissiontype="edit" value="true" />
+                                    <input type="hidden" name="permissions[@i].CanEdit" value="false" />
+                                    <label>Modifier</label>
+                                </td>
+                                <input type="hidden" name="permissions[@i].ClassName" value="@Model.ClassNames[i]" />
+                            </tr>
+                        }
+
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

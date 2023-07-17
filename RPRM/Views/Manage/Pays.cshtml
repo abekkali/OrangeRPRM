@@ -1,0 +1,427 @@
+﻿@using RPRM.Models.Metiers;
+@model List<Pays>
+
+@{
+    ViewData["Title"] = "Orange -RPRM";
+    await Component.InvokeAsync("CheckPermission", new { className = "Pays" });
+    var permissions = TempData["Permissions"] as dynamic;
+    bool hasViewPermission = permissions?.View ?? false;
+    bool hasEditPermission = permissions?.Edit ?? false;
+
+
+}
+
+
+<div class="pagetitle">
+    <h1>Gestion des pays</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item">Manager</li>
+            <li class="breadcrumb-item active">Pays</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Liste des pays</h5>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        <div id="messagepays"></div>
+
+        @if (hasEditPermission)
+        {
+            <button type="submit" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addPaysModal">Ajouter Pays</button>
+        }
+       
+    <form asp-controller="Manage" asp-action="DeleteSelected" method="post">
+            <table id="table_pays" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                   @if (hasEditPermission)
+                   {
+                    <th scope="col"></th>
+                   }
+                    <th scope="col">Code pays</th>
+                    <th scope="col">CC</th>
+                    <th scope="col">Flag</th>
+                    <th scope="col">Nom pays</th>
+                    <th scope="col">Continent</th>
+                    <th scope="col">Region</th>
+                    <th scope="col">MCC</th>
+                    <th scope="col">Pass</th>
+                        @if (hasEditPermission)
+                        {
+                            <th scope="col">Action</th>
+                        }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pays in Model)
+                {
+                    <tr>
+                            @if (hasEditPermission)
+                            {
+                    <td><input class="form-check-input" type="checkbox" name="selectedIds" value="@pays.Code_pays"></td>
+                            }
+                        <td>@pays.Code_pays.ToUpper()</td>
+                        <td>@pays.CC</td>
+                            <td>
+                                <span class="flag-icon" data-iso3="@pays.Code_pays"></span>
+                            </td>
+                        <td>@pays.Nom_pays</td>
+                        <td>@pays.Continent</td>
+                        <td>@pays.Region</td>
+                        <td>@pays.MCC</td>
+                            <td>
+                                @if (@pays.Pass == "oui")
+                                {
+                                    <i class="bi bi-check-lg text-success"></i>
+                                }
+                            </td>
+                       
+                                @if (hasEditPermission)
+                            {
+                                <td>
+                                    <button type="button" id="mod_pays" class="btn btn-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#modifyPaysModal" data-code-pays="@pays.Code_pays" data-nom-pays="@pays.Nom_pays" data-nom-ang="@pays.Nom_pays_anglais" data-mcc="@pays.MCC" data-cc="@pays.CC" data-pass="@pays.Pass" data-continent="@pays.Continent" data-region="@pays.Region"><i class="bi bi-pencil"></i></button>
+                                </td>
+                            }
+                            
+                    </tr>
+                }
+            </tbody>
+        </table>
+             @if (hasEditPermission)
+                    {
+        <input type="hidden" name="className" value="Pays" />
+    <input type="checkbox"  id="selectAll" class="form-check-input" style="margin-top: 0.4em;margin-left: 0.45em;">
+                <label>Tout cocher</label> <button type="submit" id="delete-btn-check" class="btn btn-sm btn-danger">Supprimer</button>
+    }
+    </form>
+    <br />
+    </div>
+</div>
+<div class="modal fade" id="modifyPaysModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier Pays</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="modifyPaysForm" asp-controller="Manage" asp-action="UpdatePays" method="post" asp-anti-forgery="true">
+                <input type="hidden" name="Code_pays" id="mCode_Pays_Hidden" />
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label for="mCode_Pays" class="col-md-4 col-lg-3 col-form-label position-relative">Code Pays</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input type="text" class="form-control" id="mCode_Pays" value="" disabled>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="m_cc" class="col-md-4 col-lg-3 col-form-label position-relative">CC</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="CC" type="number" class="form-control" id="m_cc" value="" maxlength="3" required>
+                            <div id="mccError" class="text-danger"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mNom_Pays" class="col-md-4 col-lg-3 col-form-label">Nom Pays</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Nom_pays" type="text" class="form-control" id="mNom_Pays" value="" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mNomAng" class="col-md-4 col-lg-3 col-form-label">Nom Pays anglais</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Nom_pays_anglais" type="text" class="form-control" id="mNomAng" value="" required>
+                        </div>
+                    </div>mRegion
+                    <div class="row mb-3">
+                        <label for="addContinent" class="col-md-4 col-lg-3 col-form-label">Continent</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Continent" type="text" class="form-control" id="mContinent" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="addRegion" class="col-md-4 col-lg-3 col-form-label">Region</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Region" type="text" class="form-control" id="mRegion" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mMCC" class="col-md-4 col-lg-3 col-form-label position-relative">MCC</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="MCC" type="number" class="form-control" id="mMCC" value="" required>
+                            <div id="mMccError" class="text-danger"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mPass" class="col-md-4 col-lg-3 col-form-label">Pass</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="mPass" name="Pass" class="form-select" aria-label="Default" required>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPaysModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter Pays</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Manage" asp-action="AddPays" method="post" id="addPaysForm" asp-anti-forgery="true">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label for="add_Code_Pays" class="col-md-4 col-lg-3 col-form-label">Code Pays</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Code_pays" type="text" class="form-control" id="add_Code_Pays" value="" maxlength="3" required>
+                            <span id="codePaysError" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="add_cc" class="col-md-4 col-lg-3 col-form-label">CC</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="CC" type="number" class="form-control" id="add_cc" value="" maxlength="3" required>
+                            <div id="AddccError" class="text-danger"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="addNom_Pays" class="col-md-4 col-lg-3 col-form-label">Nom Pays</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Nom_pays" type="text" class="form-control" id="addNom_Pays" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="mNom_Pays_anglais" class="col-md-4 col-lg-3 col-form-label">Nom Pays anglais</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Nom_pays_anglais" type="text" class="form-control" id="mNom_Pays_anglais" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="addContinent" class="col-md-4 col-lg-3 col-form-label">Continent</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Continent" type="text" class="form-control" id="addContinent" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="addRegion" class="col-md-4 col-lg-3 col-form-label">Region</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="Region" type="text" class="form-control" id="addRegion" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="addMCC" class="col-md-4 col-lg-3 col-form-label">MCC</label>
+                        <div class="col-md-8 col-lg-9">
+                            <input name="MCC" type="number" class="form-control" id="addMCC" required>
+                            <div id="AddmccError" class="text-danger"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="addPass" class="col-md-4 col-lg-3 col-form-label">Pass</label>
+                        <div class="col-md-8 col-lg-9">
+                            <select id="addPass" name="Pass" class="form-select" aria-label="Default" required>
+                                <option value="oui">oui</option>
+                                <option value="non">non</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            $(document).ready(function () {
+                $('#table_pays').DataTable();
+            
+                $('.form-control[maxlength]').on('input', function () {
+                    var maxlength = $(this).attr('maxlength');
+                    if ($(this).val().length > maxlength) {
+                        $(this).val($(this).val().slice(0, maxlength));
+                    }
+                }); $('input[type="number"]').on('input', function () {
+                    var value = $(this).val();
+                    value = value.replace(/\D/g, '');
+                    value = value.slice(0, 3);
+                    $(this).val(value);
+                });
+            });
+
+            const formFields = [
+                { id: 'add_cc', errorId: 'AddccError', regex: /^\d{1,3}$/, errorMessage: 'CC doit contenir 1 à 3 chiffres' },
+                { id: 'addMCC', errorId: 'AddmccError', regex: /^\d{3}$/, errorMessage: 'MCC doit contenir 3 chiffres' },
+                { id: 'add_Code_Pays', errorId: 'codePaysError', regex: /^[a-zA-Z]{3}$/, errorMessage: 'Code Pays doit contenir 3 lettres' },
+            ];
+            const modformFields = [
+                { id: 'm_cc', errorId: 'mccError', regex: /^\d{1,3}$/, errorMessage: 'CC doit contenir 1 à 3 chiffres' },
+                { id: 'mMCC', errorId: 'mMccError', regex: /^\d{3}$/, errorMessage: 'MCC doit contenir 3 chiffres' },
+            ];
+
+            formFields.forEach(field => {
+                document.getElementById(field.id).addEventListener("input", () => {
+                    validateField(field);
+                });
+            });
+            modformFields.forEach(field => {
+                document.getElementById(field.id).addEventListener("input", () => {
+                    validateField(field);
+                });
+            });
+
+            document.getElementById("addPaysForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                let isValid = true;
+                formFields.forEach(field => {
+                    const valid = validateField(field);
+                    if (!valid) isValid = false;
+                });
+
+                if (!isValid) return;
+
+                await submitForm(event, "#addPaysModal", "add");
+            });
+
+            document.getElementById("modifyPaysForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                let isValid = true;
+                modformFields.forEach(field => {
+                    const valid = validateField(field);
+                    if (!valid) isValid = false;
+                });
+                await submitForm(event, "#modifyPaysModal", "modify");
+            });
+
+            function validateField(field) {
+                const value = document.getElementById(field.id).value;
+                const errorElement = document.getElementById(field.errorId);
+                errorElement.textContent = "";
+
+                if (!field.regex.test(value)) {
+                    errorElement.textContent = field.errorMessage;
+                    return false;
+                }
+
+                return true;
+            }
+
+            async function submitForm(event, modalId, action) {
+                event.preventDefault();
+                var formData = new FormData(event.target);
+                const messageDiv = document.getElementById("messagepays");
+                $.ajax({
+                    type: "POST",
+                    url: event.target.action,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result.success) {
+                            let checkboxHTML = '<input class="form-check-input" type="checkbox" name="selectedIds" value="' + formData.get("Code_pays") + '">';
+                            let flagHTML = '<span class="flag-icon" data-iso3="' + formData.get("Code_pays") + '"></span>';
+                            let buttonHTML = '<button type="button" id="mod_pays" class="btn btn-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#modifyPaysModal" data-code-pays="' + formData.get("Code_pays") + '" data-nom-pays="' + formData.get("Nom_pays") + '" data-nom-ang="' + formData.get("Nom_pays_anglais") + '" data-mcc="' + formData.get("MCC") + '" data-cc="' + formData.get("CC") + '" data-pass="' + formData.get("Pass") + '" data-continent="' + formData.get("Continent") + '" data-region="' + formData.get("Region") + '"><i class="bi bi-pencil"></i></button>';
+
+                            $(modalId).modal("hide");
+                            messageDiv.className = "alert alert-success";
+                            var table = $('#table_pays').DataTable();
+
+                            if (action === "add") {
+                                var newRow = table.row.add([
+                                    checkboxHTML,
+                                    formData.get("Code_pays"),
+                                    formData.get("CC"),
+                                    flagHTML,
+                                    formData.get("Nom_pays"),
+                                    formData.get("Continent"),
+                                    formData.get("Region"),
+                                    formData.get("MCC"),
+                                    formData.get("Pass") === "oui" ? '<i class="bi bi-check-lg text-success"></i>' : '',
+                                    buttonHTML,
+                                ]).draw(false);
+
+                                messageDiv.textContent = "Pays ajouté avec succès";
+                            }
+                            else if (action === "modify") {
+                                var row = $('button[data-code-pays="' + formData.get("Code_pays") + '"]').closest('tr');
+                                var cell = table.cell(row, 1);
+                                if (cell.index() === undefined) {
+                                    console.error('cell not found');
+                                    return;
+                                }
+
+                                var rowIdx = cell.index().row;
+                               
+                                table.cell(rowIdx, 1).data(formData.get("Code_pays")).draw();
+                                table.cell(rowIdx, 2).data(formData.get("CC")).draw();
+                                table.cell(rowIdx, 3).data(flagHTML).draw();
+                                table.cell(rowIdx, 4).data(formData.get("Nom_pays")).draw();
+                                table.cell(rowIdx, 5).data(formData.get("Continent")).draw();
+                                table.cell(rowIdx, 6).data(formData.get("Region")).draw();
+                                table.cell(rowIdx, 7).data(formData.get("MCC")).draw();
+                                table.cell(rowIdx, 8).data(formData.get("Pass") === "oui" ? '<i class="bi bi-check-lg text-success"></i>' : '').draw();
+                                table.cell(rowIdx, 9).data(buttonHTML).draw();
+
+                                messageDiv.textContent = "Pays modifié avec succès";
+                            }
+                        } else {
+                            const codePaysErrorElement = document.getElementById("codePaysError");
+                            codePaysErrorElement.textContent = result.message;
+                            codePaysErrorElement.className = "text-danger";
+                        }
+
+                        setTimeout(() => {
+                            messageDiv.textContent = "";
+                            messageDiv.className = "";
+                        }, 5000);
+                    },
+                        error: function (err) {
+                        messageDiv.className = "alert alert-danger";
+                        messageDiv.textContent = err;
+                    }
+                });
+            }
+        });
+        fetch('/iso.json')
+            .then(response => response.json())
+            .then(countries => {
+                const flagElems = document.querySelectorAll('[data-iso3]');
+
+                flagElems.forEach(flagElem => {
+                    const iso3Code = flagElem.dataset.iso3;
+                    const country = countries.find(country => country.country_iso_3_char_code === iso3Code);
+
+                    if (country) {
+                        flagElem.classList.add(`flag-icon-${country.country_iso_2_char_code.toLowerCase()}`);
+                    }
+                });
+            })
+            .catch(err => console.error(err));
+    </script>
+
+    <script src="~/js/site.js"></script>
+}
