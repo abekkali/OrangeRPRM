@@ -522,15 +522,7 @@
                     });
                 });
         }
-        function getRandomColor() {
-            var letters = '0123456789ABCDEF';
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
+   
         function addCountryColors(countries, selectedServiceIds, selectedDirectionIds) {
             const servicesColors = {};
             const legend = document.getElementById('legend');
@@ -1256,12 +1248,9 @@
 
             function createCharts() {
                 setTimeout(function () {
-                    // Récupérez les services à partir de localStorage.
                     var lookupData = JSON.parse(localStorage.getItem('lookupData'));
                     var serviceNames = lookupData.filter(item => item.lookup_Type === "Type_Incident").map(item => item.value);
-                    console.log(serviceNames);
-                    // Création d'un dictionnaire où les clés sont les continents et les valeurs sont des objets.
-                    // Les objets contiennent le nombre d'occurrences de chaque service.
+
                     var dataByContinent = apiResponse.reduce(function (map, item) {
                         if (!map[item.continent]) {
                             map[item.continent] = serviceNames.reduce(function (serviceMap, service) {
@@ -1273,38 +1262,51 @@
                         item.incidents.forEach(function (incident) {
                             map[item.continent][incident.typeIncident]++;
                         });
-                        console.log(map);
                         return map;
-
                     }, {});
 
-                    // Maintenant, générer le tableau de datasets
-                    var datasets = Object.keys(dataByContinent).map(function (continent, index) {
-                        // Générer une couleur pour ce dataset
-                        var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-
-                        return {
-                            label: continent,
-                            data: serviceNames.map(function (serviceName) {
-                                return dataByContinent[continent][serviceName] || 0;
-                            }),
-                            borderColor: color,
-                            backgroundColor: color,
-                            fill: true
-                        };
-                    });
-
-                    // Enfin, utilisez le tableau de datasets dans la configuration de votre graphique
                     var ctx = $("#chart-line")[0].getContext('2d');
                     var ctx2 = $("#chart-line2")[0].getContext('2d');
 
+                    var radarData = {
+                        labels: serviceNames,
+                        datasets: Object.keys(dataByContinent).map(function (continent, index) {
+                            return {
+                                label: continent,
+                                data: serviceNames.map(function (serviceName) {
+                                    return dataByContinent[continent][serviceName] || 0;
+                                }),
+                                backgroundColor: 'transparent',
+                                borderColor: getRandomColor(),
+                                pointBackgroundColor: getRandomColor(),
+                                fill: false
+                            };
+                        }),
+                    };
+
+                    var pieData = {
+                        labels: serviceNames,
+                        datasets: [{
+                            label: 'Incident',
+                            data: serviceNames.map(function (serviceName) {
+                                var total = 0;
+                                Object.keys(dataByContinent).forEach(function (continent) {
+                                    total += dataByContinent[continent][serviceName] || 0;
+                                });
+                                return total;
+                            }),
+                            backgroundColor: serviceNames.map(function (serviceName) {
+                                return getRandomColor();
+                            }),
+                            borderColor: 'rgba(0,0,0,0.1)'
+                        }]
+                    };
+
                     myLineChart = new Chart(ctx, {
                         type: 'radar',
-                        data: {
-                            labels: serviceNames,
-                            datasets: datasets
-                        },
+                        data: radarData,
                         options: {
+                            responsive: true,
                             title: {
                                 display: true,
                                 text: 'Radar Incident'
@@ -1314,45 +1316,43 @@
 
                     myLineChart2 = new Chart(ctx2, {
                         type: 'pie',
-                        data: {
-                            labels: serviceNames,
-                            datasets: [{
-                                label: '# of Votes',
-                                data: serviceNames.map(function (serviceName) {
-                                    var total = 0;
-                                    Object.keys(dataByContinent).forEach(function (continent) {
-                                        total += dataByContinent[continent][serviceName] || 0;
-                                    });
-                                    return total;
-                                }),
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.2)',
-                                    'rgba(54, 162, 235, 0.2)',
-                                    'rgba(255, 206, 86, 0.2)'
-                                ],
-                                borderColor: [
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)',
-                                    'rgba(255, 206, 86, 1)'
-                                ],
-                                borderWidth: 1
-                            }]
-                        },
+                        data: pieData,
                         options: {
                             responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Pie Chart Example'
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Incident'
+                            },
+                            tooltips: {
+                                callbacks: {
+                                    label: function (tooltipItem, data) {
+                                        var dataset = data.datasets[tooltipItem.datasetIndex];
+                                        var total = dataset.data.reduce(function (previousValue, currentValue) {
+                                            return previousValue + currentValue;
+                                        });
+                                        var currentValue = dataset.data[tooltipItem.index];
+                                        var percentage = Math.floor((currentValue / total) * 100 + 0.5);
+                                        return data.labels[tooltipItem.index] + ": " + percentage + "%";
+                                    }
                                 }
                             }
-                        },
+                        }
                     });
                 }, 0);
             }
+
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF';
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+
 
             $(document).on('click', '#dotIcon4, .dotIcon', function () {
 
