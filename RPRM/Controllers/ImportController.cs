@@ -531,15 +531,31 @@ namespace RPRM.Controllers
                 var MCC = mccmnc?.Length >= 3 ? mccmnc.Substring(0, 3) : null;
                 var MNC = mccmnc?.Length >= 5 ? mccmnc.Substring(3) : null;
 
+                string opPriv = "non", rna = "non", raTerminated = "non";
+                if (columnMappings.TryGetValue("Op Priv", out var opPrivCol))
+                {
+                    opPriv = worksheet.Cells[row, opPrivCol]?.Value?.ToString().Trim().ToLower() == "yes" ? "oui" : "non";
+                }
+
+                if (columnMappings.TryGetValue("RNA=Yes", out var rnaCol))
+                {
+                    rna = worksheet.Cells[row, rnaCol]?.Value != null ? "oui" : "non";
+                }
+
+                if (columnMappings.TryGetValue("Close Date si dispo", out var raTerminatedCol))
+                {
+                    raTerminated = worksheet.Cells[row, raTerminatedCol]?.Value != null ? "oui" : "non";
+                }
+
                 var newOperateur = new Operateurs
                 {
                     Code_PLMN = Code_PLMN.ToUpper(),
                     Nom_Op = Nom_Operateur,
                     MCC = MCC,
                     MNC = MNC,
-                    Op_prefered="non",
-                    RNA="non",
-                    RA_Teminated="non",
+                    Op_prefered= opPriv,
+                    RNA=rna,
+                    RA_Teminated= raTerminated,
                     Code_pays = codePays,
                     TypeOperateurId = typeOpId,
                     TypeAccordId = typeAcc.Id,
@@ -935,6 +951,7 @@ namespace RPRM.Controllers
 
                 existingIncidents.Add(new { Code_PLMN = newIncident.Code_PLMN, Code_TT = newIncident.Code_TT, Commentaire = newIncident.Commentaire });
                 newIncidents.Add(newIncident);
+                count++;
             }
 
             _context.incidents.AddRange(newIncidents);
