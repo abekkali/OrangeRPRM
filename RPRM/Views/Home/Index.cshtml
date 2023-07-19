@@ -413,7 +413,14 @@
         var infoboxCountryCodes = new Map();
         var pushpinInfoboxes = new Map();
 
-
+        function getRandomColor() {
+                var letters = '0123456789ABCDEF';
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
         function GetMap() {
             map = new Microsoft.Maps.Map('#map', {
                 zoom: 2,
@@ -1343,16 +1350,6 @@
                     });
                 }, 0);
             }
-
-            function getRandomColor() {
-                var letters = '0123456789ABCDEF';
-                var color = '#';
-                for (var i = 0; i < 6; i++) {
-                    color += letters[Math.floor(Math.random() * 16)];
-                }
-                return color;
-            }
-
 
             $(document).on('click', '#dotIcon4, .dotIcon', function () {
 
