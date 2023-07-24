@@ -8,6 +8,7 @@ using RPRM.Models.ViewModels;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RPRM.Controllers
@@ -472,10 +473,14 @@ namespace RPRM.Controllers
         {
             var query = _context.Pays.AsQueryable();
 
-            var countryNames = query.Select(c => c.Nom_pays).Distinct().ToList();
+            var countryNames = query.Select(c => new { c.Nom_pays, c.Nom_pays_anglais }) // fetch French and English names
+                                    .ToList() // fetch data from DB
+                                    .Select(c => new { Nom_pays = NormalizeString(c.Nom_pays), Nom_pays_anglais = NormalizeString(c.Nom_pays_anglais) }) // normalize strings
+                                    .ToList();
 
             return Ok(countryNames);
         }
+
         [HttpGet("OpByCountry")]
         public IActionResult GetOperatorCountByCountry()
         {
@@ -690,9 +695,24 @@ namespace RPRM.Controllers
 
             return Ok(groupedServices);
         }
+        public string NormalizeString(string input)
+        {
+            var normalizedString = input.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
 
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
     }
-
+    
     public class DataTablesRequest
     {
         public int Draw { get; set; }

@@ -421,6 +421,14 @@
                 }
                 return color;
             }
+        function transparentize(color, opacity) {
+            var alpha = Math.round(255 * opacity).toString(16);
+            if (alpha.length < 2) {
+                alpha = "0" + alpha;
+            }
+            return color + alpha;
+        }
+
         function GetMap() {
             map = new Microsoft.Maps.Map('#map', {
                 zoom: 2,
@@ -456,54 +464,31 @@
                         // Get selected service IDs
                         selectedServiceIds = Array.from(document.querySelectorAll('input[id^="mapNom_Service"]:checked')).map(input => parseInt(input.id.replace('mapNom_Service-', '')));
                         const selectedDirectionIds = Array.from(document.querySelectorAll('input[id^="mapDirection"]:checked')).map(input => parseInt(input.id.replace('mapDirection-', '')));
-                        let selectedServiceDirectionPairs = selectedServiceIds.map((serviceId, index) => {
-                            return {
-                                service: serviceId,
-                                direction: selectedDirectionIds[index]
-                            };
-                        });
-                        console.log(selectedServiceDirectionPairs);
-                        console.log('Operator data before filtering:', JSON.parse(JSON.stringify(operatorData)));
+
                         operatorData.forEach(country => {
                             country.operators = country.operators.filter(operator => {
-                                // If there are selected services but no selected directions,
-                                // keep operators that have all of the selected services
-                                if (selectedServiceIds.length > 0 && selectedDirectionIds.length === 0) {
+                                if (selectedServiceIds.length > 0 && selectedDirectionIds.length > 0) {
+                                    // Filtrer les opérateurs qui ont au moins un service dans l'une des directions sélectionnées
+                                    return operator.service_direction_pairs.some(pair =>
+                                        selectedServiceIds.includes(pair.service) && selectedDirectionIds.includes(pair.direction)
+                                    );
+                                } else if (selectedServiceIds.length > 0) {
+                                    // Filtrer les opérateurs qui ont tous les services sélectionnés
                                     return selectedServiceIds.every(serviceId =>
                                         operator.service_direction_pairs.some(pair => pair.service === serviceId)
                                     );
-                                }
-                                // If there are selected directions but no selected services,
-                                // keep operators where all services have one of the selected directions
-                                else if (selectedServiceIds.length === 0 && selectedDirectionIds.length > 0) {
-                                    return operator.service_direction_pairs.every(pair =>
+                                } else if (selectedDirectionIds.length > 0) {
+                                    // Filtrer les opérateurs qui ont au moins un service dans l'une des directions sélectionnées pour n'importe quel service
+                                    return operator.service_direction_pairs.some(pair =>
                                         selectedDirectionIds.includes(pair.direction)
                                     );
-                                }
-                                // If there are both selected services and selected directions,
-                                // keep operators that have all of the selected services with the selected direction
-                                else if (selectedServiceIds.length > 0 && selectedDirectionIds.length === 1) {
-                                    return selectedServiceIds.every(serviceId =>
-                                        operator.service_direction_pairs.some(pair =>
-                                            pair.service === serviceId && pair.direction === selectedDirectionIds[0]
-                                        )
-                                    );
-                                }
-                                // If there are multiple selected services and multiple selected directions,
-                                // keep operators with at least one pair that matches both a selected service and a selected direction
-                                else if (selectedServiceIds.length > 0 && selectedDirectionIds.length > 1) {
-                                    return selectedServiceDirectionPairs.some(pair =>
-                                        operator.service_direction_pairs.some(service_direction =>
-                                            service_direction.service === pair.service && service_direction.direction === pair.direction
-                                        )
-                                    );
-                                }
-                                // If there are no selected services or selected directions, keep all operators
-                                else {
+                                } else {
+                                    // Si aucun filtre de service ou de direction n'est sélectionné, conserver tous les opérateurs
                                     return true;
                                 }
                             });
                         });
+
                         operatorData = operatorData.filter(country => country.operators.length > 0);
                         console.log('Operator data after filtering:', operatorData);
                         map.entities.clear();
@@ -529,9 +514,9 @@
                     });
                 });
         }
-   
+
         function addCountryColors(countries, selectedServiceIds, selectedDirectionIds) {
-            const servicesColors = {};
+            const servicesDirectionsColors = {};
             const legend = document.getElementById('legend');
 
             countries.forEach(country => {
@@ -542,7 +527,6 @@
                 }
 
                 const isMultiPolygon = borders.geometry.type === 'MultiPolygon';
-
                 let polygons;
                 if (isMultiPolygon) {
                     polygons = borders.geometry.coordinates.map(polygon => {
@@ -552,26 +536,21 @@
                     polygons = [borders.geometry.coordinates.map(ring => ring.map(coord => new Microsoft.Maps.Location(coord[1], coord[0])))];
                 }
 
-                // Get the unique services for this country
-                const countryServicesDirections = {};
+                // Get the unique service/direction pairs for this country
+                const countryServicesDirectionsPairs = [];
                 country.operators.forEach(operator => {
                     operator.service_direction_pairs.forEach(serviceDirectionPair => {
                         if (selectedServiceIds.includes(serviceDirectionPair.service) &&
                             (selectedDirectionIds.length === 0 || selectedDirectionIds.includes(serviceDirectionPair.direction))) {
-                            if (!countryServicesDirections[serviceDirectionPair.service]) {
-                                countryServicesDirections[serviceDirectionPair.service] = new Set();
-                            }
-                            countryServicesDirections[serviceDirectionPair.service].add(serviceDirectionPair.direction);
+                            countryServicesDirectionsPairs.push(serviceDirectionPair);
                         }
                     });
                 });
 
-                const serviceKeys = Object.keys(countryServicesDirections).sort((a, b) => a - b);
-
-                if (serviceKeys.length > 0) {
-                    const serviceKey = serviceKeys.join('_');
-                    if (!servicesColors[serviceKey]) {
-                        servicesColors[serviceKey] = getRandomColor();
+                countryServicesDirectionsPairs.forEach(serviceDirectionPair => {
+                    const pairKey = `${serviceDirectionPair.service}_${serviceDirectionPair.direction}`;
+                    if (!servicesDirectionsColors[pairKey]) {
+                        servicesDirectionsColors[pairKey] = getRandomColor();
                         const legendItem = document.createElement('div');
                         legendItem.style.display = 'flex';
                         legendItem.style.flexDirection = 'row';
@@ -579,7 +558,7 @@
                         legendItem.style.marginTop = '5px';
 
                         const colorBox = document.createElement('span');
-                        colorBox.style.backgroundColor = servicesColors[serviceKey];
+                        colorBox.style.backgroundColor = servicesDirectionsColors[pairKey];
                         colorBox.style.display = 'inline-block';
                         colorBox.style.width = '30px';
                         colorBox.style.height = '30px';
@@ -591,42 +570,19 @@
                         legendItem.appendChild(colorBox);
                         const serviceName = document.createElement('span');
 
-                        if (selectedDirectionIds.length > 0) {
-                            // Regrouper les services par direction:
-                            const servicesByDirection = {};
-                            serviceKeys.forEach(service => {
-                                const directions = Array.from(countryServicesDirections[service]).sort((a, b) => a - b);
-                                directions.forEach(direction => {
-                                    if (!servicesByDirection[direction]) {
-                                        servicesByDirection[direction] = [];
-                                    }
-                                    servicesByDirection[direction].push(service);
-                                });
-                            });
-
-                            // Afficher chaque groupe:
-                            serviceName.textContent = Object.entries(servicesByDirection).map(([direction, services]) => {
-                                return `${services.map(getServiceName).join(' / ')} - ${getDirectionName(parseInt(direction))}`;
-                            }).join(' / ');
-                        } else {
-                            serviceName.textContent = serviceKeys.map(getServiceName).join(' / ');
-                        }
+                        serviceName.textContent = `${getServiceName(serviceDirectionPair.service)} - ${getDirectionName(serviceDirectionPair.direction)}`;
                         legendItem.appendChild(serviceName);
 
                         legend.appendChild(legendItem);
                     }
 
-                    const color = Microsoft.Maps.Color.fromHex(servicesColors[serviceKey]);
+                    const color = Microsoft.Maps.Color.fromHex(servicesDirectionsColors[pairKey]);
 
                     polygons.forEach(polygon => {
                         const bingPolygon = new Microsoft.Maps.Polygon(polygon, { fillColor: color, strokeColor: color });
-
                         map.entities.push(bingPolygon);
                     });
-                } else {
-                    console.log("No services for this country");
-                }
-
+                });
             });
         }
         function getServiceName(serviceId) {
@@ -715,10 +671,16 @@
             const dataList = document.getElementById('paysOptions');
             countryNames.forEach(name => {
                 const option = document.createElement('option');
-                option.value = name;
+                option.value = name.nom_pays;
+                option.text =  name.nom_pays_anglais;
                 dataList.appendChild(option);
             });
         }
+
+        function normalizeString(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
         function normalizeCountryName(countryName) {
             return countryName.toLowerCase().replace(/[^a-z]/g, '');
         }
@@ -734,6 +696,12 @@
                 var requestOptions = {
                     where: country,
                     callback: function (response) {
+
+                        // Fermer tous les infoboxes
+                        Object.values(pushpinInfoboxes).forEach(infobox => {
+                            infobox.setOptions({ visible: false });
+                        });
+
                         if (response && response.results && response.results.length > 0) {
                             var result = response.results[0];
                             var boundingBox = result.bestView;
@@ -742,25 +710,12 @@
                                 animationDuration: 2000
                             });
 
-                            Object.values(pushpinInfoboxes).forEach(infobox => {
-                                infobox.setOptions({ visible: false });
-                            });
-
                             var countryName = normalizeCountryName(result.name);
                             var infobox = pushpinInfoboxes.get(countryName);
                             if (infobox) {
                                 infobox.setOptions({ visible: true });
                             } else {
                                 console.error(`Infobox for ${countryName} not found`);
-                            }
-
-                            console.log(countryName);
-                            var arubaInfobox = pushpinInfoboxes.get('aruba');
-                            if (arubaInfobox) {
-                                console.log(arubaInfobox);
-                                arubaInfobox.setOptions({ visible: true });
-                            } else {
-                                console.error('Aruba infobox not found');
                             }
                         } else {
                             alert("Aucun pays trouvé avec ce nom ou ce code.");
@@ -1278,15 +1233,16 @@
                     var radarData = {
                         labels: serviceNames,
                         datasets: Object.keys(dataByContinent).map(function (continent, index) {
+                            var color = getRandomColor();
                             return {
                                 label: continent,
                                 data: serviceNames.map(function (serviceName) {
                                     return dataByContinent[continent][serviceName] || 0;
                                 }),
-                                backgroundColor: 'transparent',
-                                borderColor: getRandomColor(),
-                                pointBackgroundColor: getRandomColor(),
-                                fill: false
+                                backgroundColor: transparentize(color, '0.2'),
+                                borderColor: color, 
+                                pointBackgroundColor: color,
+                                fill: true 
                             };
                         }),
                     };
