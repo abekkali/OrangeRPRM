@@ -805,25 +805,44 @@
                         // Service ouverts
                         $("#serviceTable tr:not(:first)").remove();
                         if (data.serviceOuverts && data.serviceOuverts.length > 0) {
-                        var currentDestination = null;
-                        var currentColor = 'rgba(0, 0, 0, 0.05)';  
-                        var currentColor = 'rgba(0, 0, 0, 0.05)'; 
-                        data.serviceOuverts.forEach(function (s) {
-                            if (s.destination !== currentDestination) {
-                                // Changer la couleur quand la destination change
-                                currentColor = currentColor === 'transparent' ? 'rgba(0, 0, 0, 0.05)' : 'transparent';
-                                currentDestination = s.destination;
+                            var currentDestination = null;
+                            var currentColor = 'rgba(0, 0, 0, 0.05)';
+                            var destinationCount = 0;
+                            var destinationCell = null;
+
+                            data.serviceOuverts.forEach(function (s, index) {
+                                if (s.destination !== currentDestination) {
+                                    // Changer la couleur quand la destination change
+                                    currentColor = currentColor === 'transparent' ? 'rgba(0, 0, 0, 0.05)' : 'transparent';
+                                    currentDestination = s.destination;
+
+                                    if (destinationCell !== null) {
+                                        destinationCell.attr('rowspan', destinationCount);
+                                    }
+
+                                    destinationCount = 1;
+                                    destinationCell = $("<td></td>").text(s.destination).css('vertical-align', 'middle');
+                                } else {
+                                    destinationCount++;
+                                }
+
+                                var tableRow = $("<tr></tr>").css('background-color', currentColor);
+                                var nomService = $("<td></td>").text(s.nomService);
+                                var direction = $("<td></td>").text(s.direction);
+                                var date_d = $("<td></td>").text(s.date_d);
+
+                                if (s.destination === currentDestination && destinationCount === 1) {
+                                    tableRow.append(destinationCell, nomService, direction, date_d);
+                                } else {
+                                    tableRow.append(nomService, direction, date_d);
+                                }
+
+                                $("#serviceTable").append(tableRow);
+                            });
+
+                            if (destinationCell !== null) {
+                                destinationCell.attr('rowspan', destinationCount);
                             }
-
-                            var tableRow = $("<tr></tr>").css('background-color', currentColor);
-                            var destination = $("<td></td>").text(s.destination);
-                            var nomService = $("<td></td>").text(s.nomService);
-                            var direction = $("<td></td>").text(s.direction);
-                            var date_d = $("<td></td>").text(s.date_d);
-
-                            tableRow.append(destination, nomService, direction, date_d);
-                            $("#serviceTable").append(tableRow);
-                        });
                         }
                         // Incident
                         $("#incidentTable tr:not(:first)").remove();
