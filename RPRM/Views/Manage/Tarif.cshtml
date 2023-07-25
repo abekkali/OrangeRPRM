@@ -330,6 +330,11 @@
         <br />
     </div>
 </div>
+<style>
+    .nowrap {
+        white-space: nowrap;
+    }
+</style>
 
 @section Scripts {
     <script>
@@ -345,7 +350,7 @@
                 { data: "dateFin", name: "dateFin" },
                 { data: "increment", name: "increment" },
                 { data: "exchangeRate", name: "exchangeRate" },
-                { data: "rate", name: "rate" },
+                { data: "rate", name: "rate", className: "nowrap" },
                 { data: "commentaire", name: "commentaire" },
                 { data: "direction", name: "direction" },
                 { data: "autoRenwal", name: "autoRenwal" },
@@ -508,6 +513,7 @@
                         success: function (response) {
                             mTarif.empty();
                             if (response.success) {
+                                $('#table_tarif').DataTable().draw(false); // Reload DataTable
                                 mTarif.removeClass().addClass('alert alert-success');
                                 mTarif.text(response.message);
                             } else {
@@ -533,6 +539,7 @@
                         success: function (response) {
                             mTarif.empty();
                             if (response.success) {
+                                $('#table_tarif').DataTable().draw(false); // Reload DataTable
                                 mTarif.removeClass().addClass('alert alert-success');
                                 mTarif.text(response.message);
                             } else {
@@ -581,11 +588,11 @@
                 //$('#mcurrency').attr('placeholder', currencies[devis]);
                 //$('#mcurrency').attr('title', currencies[devis]);
 
+                selectDefaultOption("#mtrafficType", typeTrafic);
+                selectDefaultOption("#mtarifType", typeTarif);
+                selectDefaultOption("#mincrement", increment);
+                selectDefaultOption("#mdirection", direction);
 
-                $('#mtrafficType option[value="' + typeTrafic + '"]').prop('selected', true);
-                $('#mtarifType option[value="' + typeTarif + '"]').prop('selected', true);
-                $('#mincrement option[value="' + increment + '"]').prop('selected', true);
-                $('#mdirection option[value="' + direction + '"]').prop('selected', true);
 
             });
         });
