@@ -346,8 +346,8 @@
                 { data: "code_PLMN", name: "code_PLMN" },
                 { data: "typeTrafic", name: "typeTrafic" },
                 { data: "typeTarif", name: "typeTarif" },
-                { data: "dateDebut", name: "dateDebut" },
-                { data: "dateFin", name: "dateFin" },
+                { data: "dateDebut", name: "dateDebut" ,className: "nowrap"  },
+                { data: "dateFin", name: "dateFin", className: "nowrap" },
                 { data: "increment", name: "increment" },
                 { data: "exchangeRate", name: "exchangeRate" },
                 { data: "rate", name: "rate", className: "nowrap" },
@@ -422,6 +422,8 @@
     <script>
         $(document).ready(function () {
             $('#table_tarif').DataTable();
+            $('#table_tarif thead th').removeClass('nowrap');
+
             loadPLMNCodes();
             fetchLookupData().then(function (lookupData) {
                 populateLookupDropdown(lookupData, 'Type_Trafic', 'trafficType');

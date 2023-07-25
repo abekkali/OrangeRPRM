@@ -34,7 +34,7 @@
                     <div class="row mb-3">
                         <label for="plmnSelect" class="col-md-4 col-lg-3 col-form-label">Code PLMN</label>
                         <div class="col-md-8 col-lg-9">
-                            <input class="form-select" list="plmnOptions" id="plmnSelect" name="Code_PLMN">
+                            <input class="form-select" list="plmnOptions" id="plmnSelect" name="Code_PLMN" required>
                             <datalist id="plmnOptions">
                             </datalist>
                             <span id="plmnError" class="error-message" style="display:none;">Veuillez sélectionner une option valide</span>
@@ -58,7 +58,7 @@
                     <div class="row">
                     <div class="mb-3 col-6">
                         <label for="dateDebut" class="col-form-label">Date de début</label>
-                            <input type="date" id="dateDebut" name="date_d" class="form-control">
+                            <input type="date" id="dateDebut" name="date_d" class="form-control" >
                     </div>
                     <div class="mb-3 col-6">
                         <label for="dateFin" class="col-form-label">Date de fin</label>
@@ -68,41 +68,27 @@
                     <div class="row mb-3">
                         <label for="commentaire" class="col-md-4 col-lg-3 col-form-label">Commentaire</label>
                         <div class="col-md-8 col-lg-9">
-                            <input type="text" id="commentaire" name="Commentaire" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="typeTrafic" class="col-md-4 col-lg-3 col-form-label">Type Trafic</label>
-                        <div class="col-md-8 col-lg-9">
-                            <select class="form-select" id="typeTrafic" name="Type_Trafic_id">
-                            </select>
+                            <input type="text" id="commentaire" name="Commentaire" class="form-control" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label for="codeTT" class="col-md-4 col-lg-3 col-form-label">Code TT</label>
                         <div class="col-md-8 col-lg-9">
-                            <input type="text" id="codeTT" name="Code_TT" class="form-control">
+                            <input type="text" id="codeTT" name="Code_TT" class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row mb-3">
-                        <label for="nomService" class="col-md-4 col-lg-3 col-form-label">Nom Service</label>
-                        <div class="col-md-8 col-lg-9">
-                            <select class="form-select" id="nomService" name="Nom_Service_id">
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
                         <label for="typeIncident" class="col-md-4 col-lg-3 col-form-label">Type Incident</label>
                         <div class="col-md-8 col-lg-9">
-                            <select class="form-select" id="typeIncident" name="Type_Incident_id">
+                            <select class="form-select" id="typeIncident" name="Type_Incident_id" required>
                             </select>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label for="direction" class="col-md-4 col-lg-3 col-form-label">Direction</label>
                         <div class="col-md-8 col-lg-9">
-                            <select class="form-select" id="direction" name="Direction_id">
+                            <select class="form-select" id="direction" name="Direction_id" required>
                             </select>
                         </div>
                     </div>
@@ -169,18 +155,6 @@
                         <label for="mcommentaire" class="col-md-4 col-lg-3 col-form-label">Commentaire</label>
                         <div class="col-md-8 col-lg-9">
                         <input type="text" class="form-control" name="Commentaire" id="mcommentaire">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="mb-3 col-6">
-                            <label for="typeTrafic" class="col-form-label">Type Trafic</label>
-                            <select class="form-select" id="mtypeTrafic" name="Type_Trafic_id">
-                            </select>
-                        </div>
-                        <div class="mb-3 col-6">
-                            <label for="nomService" class="col-form-label">Nom Service</label>
-                            <select class="form-select" id="mnomService" name="Nom_Service_id">
-                            </select>
                         </div>
                     </div>
                     <div class="row">
@@ -323,18 +297,17 @@
             let codeTT = document.getElementById(prefix + 'codeTT');
             let msisdn = document.getElementById(prefix + 'msisdn');
             let typeIncidentId = document.getElementById(prefix + 'typeIncident');
-            let typeTraficId = document.getElementById(prefix + 'typeTrafic');
             let directionId = document.getElementById(prefix + 'direction');
             let modalIncidentmessage = $('#' + modalMessageId);
 
             // validate key pk and fk
-            if (!codePLMN.value || !typeIncidentId.value || !typeTraficId.value || !directionId.value) {
+            if (!codePLMN.value || !typeIncidentId.value || !directionId.value) {
                 modalIncidentmessage.html('Toutes les clés (code plmn , type incident , type trafic et direction) doivent être non nulles.');
                 modalIncidentmessage.removeClass().addClass('alert alert-danger');
                 return false;
             }
             // validate IMSI
-            if (!/^\d{15}$/.test(imsi.value)) {
+            if (imsi.value && !/^\d{15}$/.test(imsi.value)) {
                 modalIncidentmessage.html('IMSI doit contenir exactement 15 chiffres.');
                 modalIncidentmessage.removeClass().addClass('alert alert-danger');
                 return false;
@@ -350,7 +323,7 @@
             }
 
             // validate MSISDN
-            if (!/^\w{1,20}$/.test(msisdn.value)) {
+            if (msisdn.value && !/^\w{1,20}$/.test(msisdn.value)) {
                 console.log('MSISDN should contain up to 20 alphanumeric characters.');
                 modalIncidentmessage.html('MSISDN doit contenir jusqu\'à 20 caractères alphanumériques.');
                 modalIncidentmessage.removeClass().addClass('alert alert-danger');
@@ -397,18 +370,18 @@
                     });
                 }
                 // populate dropdowns
-                populateLookupDropdown('Type_Trafic', 'typeTrafic');
                 populateLookupDropdown('Type_Incident', 'typeIncident');
-                populateLookupDropdown('Nom_Service', 'nomService');
                 populateLookupDropdown('Direction', 'direction');
             }).catch(function (error) {
                 console.error('Error occurred while fetching lookup data:', error);
             });
         }
         var hasModalBeenOpened = false;
-        var hasModalModOpened=false;
+        var hasModalModOpened = false;
+
         $(document).ready(function () {
             $('#table_incident').DataTable();
+
             $('#addIncidentModal').on('shown.bs.modal', function () {
                 if (!hasModalBeenOpened) {
                     loadPLMNCodes();
@@ -416,96 +389,102 @@
                     hasModalBeenOpened = true;
                 }
             });
+
             $('#addIncidentForm').on('submit', function (e) {
                 e.preventDefault();
-                    submitForm();         
+                submitForm();
             });
-            $('.modifyIncidentButton').on('click', function () {
-                let button = $(this);
-                let codeIncident = button.data('code-incident');
-                let plmn = button.data('plmn');
-                let imsi = button.data('imsi');
-                let msisdn = button.data('msisdn');
-                let dd = button.data('dd');
-                let df = button.data('df');
-                let commentaire = button.data('commentaire');
-                let codeTT = button.data('code-tt');
-                let typeIncident = button.data('type-incident');
-                let nomService = button.data('nom-service');
-                let typeTrafic = button.data('type-trafic');
-                let direction = button.data('direction');
+
+            $('#modifyIncidentModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
                 if (!hasModalModOpened) {
                     populateLookupDropdowns('m');
                     hasModalModOpened = true;
+                 
                 }
+
+                var codeIncident = button.data('code-incident');
+                var plmn = button.data('plmn');
+                var imsi = button.data('imsi');
+                var msisdn = button.data('msisdn');
+                var dd = convertToDateInputValue(button.data('dd'));
+                var df = convertToDateInputValue(button.data('df'));
+                var commentaire = button.data('commentaire');
+                var codeTt = button.data('code-tt');
+                var typeIncident = button.data('type-incident');
+                var direction = button.data('direction');
+
+                var modal = $(this);
+                modal.find('#mcodeIncident').val(codeIncident);
+                modal.find('#mcodeIncidentHidden').val(codeIncident);
+                modal.find('#mplmn').val(plmn);
+                modal.find('#mplmnSelect').val(plmn);
+                modal.find('#mimsi').val(imsi);
+                modal.find('#mmsisdn').val(msisdn);
+                modal.find('#mdate_d').val(dd);
+                modal.find('#mdate_f').val(df);
+                modal.find('#mcommentaire').val(commentaire);
+                modal.find('#mcodeTT').val(codeTt);
                 setTimeout(function () {
-                    let modal = $('#modifyIncidentModal');
-                    modal.find('.modal-body #mcodeIncident').val(codeIncident);
-                    modal.find('.modal-body #mcodeIncidentHidden').val(codeIncident);
-                    modal.find('.modal-body #mplmn').val(plmn);
-                    modal.find('.modal-body #mplmnSelect').val(plmn);
-                    modal.find('.modal-body #mimsi').val(imsi);
-                    modal.find('.modal-body #mmsisdn').val(msisdn);
-                    modal.find('.modal-body #mdate_d').val(convertToDateInputValue(dd));
-                    modal.find('.modal-body #mdate_f').val(convertToDateInputValue(df));
-                    modal.find('.modal-body #mcommentaire').val(commentaire);
-                    modal.find('.modal-body #mcodeTT').val(codeTT);
-                    modal.find('.modal-body #mtypeIncident').val(typeIncident);
-                    modal.find('.modal-body #mnomService').val(nomService);
-                    modal.find('.modal-body #mtypeTrafic').val(typeTrafic);
-                    modal.find('.modal-body #mdirection').val(direction);
+                    $('#mtypeIncident option[value="' + typeIncident + '"]').prop('selected', true);
+                    $('#mdirection option[value="' + direction + '"]').prop('selected', true);
+                }, 1000);
+               
 
-                    const inputs = modal[0].querySelectorAll('.char-count-input');
-                    inputs.forEach(input => {
-                        input.addEventListener('keypress', function (event) {
-                            let char = String.fromCharCode(event.which);
-                            if (!(/[0-9]/.test(char))) {
-                                event.preventDefault();
-                            }
-                        });
+                const inputs = modal[0].querySelectorAll('.char-count-input');
+                inputs.forEach(input => {
+                    input.addEventListener('keypress', function (event) {
+                        let char = String.fromCharCode(event.which);
+                        if (!(/[0-9]/.test(char))) {
+                            event.preventDefault();
+                        }
+                    });
 
-                        const counterDiv = document.querySelector('#counter-' + input.id);
-                        let charCount = input.value.length;
+                    const counterDiv = document.querySelector('#counter-' + input.id);
+                    let charCount = input.value.length;
+
+                    counterDiv.textContent = "Le nombre de chiffres est : " + charCount;
+
+                    input.addEventListener('input', function () {
+                        let charCount = this.value.length;
 
                         counterDiv.textContent = "Le nombre de chiffres est : " + charCount;
-
-                        input.addEventListener('input', function () {
-                            let charCount = this.value.length;
-
-                            counterDiv.textContent = "Le nombre de chiffres est : " + charCount;
-                        });
                     });
-                }, 200);
+                });
+
             });
+
             $('#modifyIncidentForm').on('submit', function (e) {
                 e.preventDefault();
                 let form = $(this);
-                if (validateForm("modalModIncidentmessage","m")) {
-                $.ajax({
-                    url: form.attr('action'),
-                    method: form.attr('method'),
-                    data: form.serialize(),
-                    success: function (response) {
-                        let incidentMessage = $('#incidentMessage');
-                        incidentMessage.html(response.message);
-                        incidentMessage.removeClass();
-                        if (response.success) {
-                            incidentMessage.addClass('alert alert-success');
-                            $('#modifyIncidentModal').modal('hide');
-                         } else {
-                            incidentMessage.addClass('alert alert-danger');
+                if (validateForm("modalModIncidentmessage", "m")) {
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: form.attr('method'),
+                        data: form.serialize(),
+                        success: function (response) {
+                            let incidentMessage = $('#incidentMessage');
+                            incidentMessage.html(response.message);
+                            incidentMessage.removeClass();
+                            if (response.success) {
+                                incidentMessage.addClass('alert alert-success');
+                                $('#modifyIncidentModal').modal('hide');
+                            } else {
+                                incidentMessage.addClass('alert alert-danger');
+                            }
+                        },
+                        error: function (response) {
+                            let incidentMessage = $('#incidentMessage');
+                            incidentMessage.html('Une erreur s\'est produite lors de la modification de l\'incident.');
+                            incidentMessage.removeClass().addClass('alert alert-danger');
                         }
-                    },
-                    error: function (response) {
-                        let incidentMessage = $('#incidentMessage');
-                        incidentMessage.html('Une erreur s\'est produite lors de la modification de l\'incident.');
-                        incidentMessage.removeClass().addClass('alert alert-danger');
-                    }
-                });
+                    });
                 }
             });
 
         });
+
+
     </script>
 
 }
