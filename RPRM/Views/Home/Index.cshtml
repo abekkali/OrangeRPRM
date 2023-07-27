@@ -405,6 +405,10 @@
     <script src="~/assets/vendor/map/map.js"></script>
     <script src="~/assets/vendor/map/topojson.js"></script>
     <script src="~/assets/vendor/chart/chart.js"></script>
+    <script src="~/assets/vendor/chart/labelchart.js"></script>
+
+
+
     <script>
         var map;
         let allOperatorData = [];
@@ -1218,6 +1222,7 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            
             let tableMode = false;
             let originalParent = $("#card1").parent();
             let cards = $(".col-3");
@@ -1226,7 +1231,7 @@
             let myLineChart;
             let myLineChart2;
             let apiResponse;
-
+            var initialPieData;
             function createCharts() {
                 setTimeout(function () {
                     var lookupData = JSON.parse(localStorage.getItem('lookupData'));
@@ -1283,7 +1288,7 @@
                             borderColor: 'rgba(0,0,0,0.1)'
                         }]
                     };
-
+                    console.log(pieData);
                     myLineChart = new Chart(ctx, {
                         type: 'radar',
                         data: radarData,
@@ -1295,8 +1300,7 @@
                             }
                         }
                     });
-
-                    myLineChart2 = new Chart(ctx2, {
+                    myLineChart2=new Chart(ctx2, {
                         type: 'pie',
                         data: pieData,
                         options: {
@@ -1311,23 +1315,31 @@
                             tooltips: {
                                 callbacks: {
                                     label: function (tooltipItem, data) {
-                                        var dataset = data.datasets[tooltipItem.datasetIndex];
-                                        var total = dataset.data.reduce(function (previousValue, currentValue) {
-                                            return previousValue + currentValue;
-                                        });
-                                        var currentValue = dataset.data[tooltipItem.index];
-                                        var percentage = Math.floor((currentValue / total) * 100 + 0.5);
-                                        return data.labels[tooltipItem.index] + ": " + percentage + "%";
+                                        var label = data.labels[tooltipItem.index] || '';
+                                        var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                                        return label + ": " + value;
                                     }
+                                }
+                            },
+                            plugins: {
+                                labels: {
+                                    render: 'percentage',
+                                    precision: 0,
+                                    fontSize: 15,
+                                    fontColor: '#fff',
+                                    textShadow: true,
+                                    shadowBlur: 10,
+                                    shadowOffsetX: -5,
+                                    shadowOffsetY: 5,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)' 
                                 }
                             }
                         }
                     });
+                    initialPieData = myLineChart2.data;
                 }, 0);
             }
-
             $(document).on('click', '#dotIcon4, .dotIcon', function () {
-
                 card4.hide();
                 if (!tableMode) {
                     if (!apiResponse) {
@@ -1351,14 +1363,21 @@
                             '  <div class="card-body">' +
                             '   <div class="filter"><a class="icon dotIcon" href="#"><i class="bi bi-three-dots"></i></a></div>' +
                             '    <h5 class="card-title">Radar Incident</h5>' +
-                            '    <div id="chartCarousel" class="carousel slide" data-bs-ride="carousel">' +
+                            '    <div id="chartCarousel" class="carousel slide" data-bs-interval="false">' +
                             '       <div class="carousel-inner">' +
+                       
                             '           <div class="carousel-item active">' +
                             '               <div class="chart-container">' +
                             '                   <canvas id="chart-line" class="chartjs-render-monitor"></canvas>' +
                             '               </div>' +
                             '           </div>' +
                             '           <div class="carousel-item">' +
+                            '               <div class="input-group mb-3">' +
+                            '                   <span class="input-group-text" id="basic-addon1">PLMN</span>' +
+                            '                   <input type="text" class="form-control" id="plmnselectradar" list="plmnOptions" name="operatorInput" placeholder="Sélectionnez un opérateur" aria-label="Username" aria-describedby="basic-addon1">' +
+                            '                    <datalist id="plmnOptions">' +
+                            '                    </datalist>' +
+                            '               </div>' +
                             '               <div class="chart-container">' +
                             '                   <canvas id="chart-line2" class="chartjs-render-monitor"></canvas>' +
                             '               </div>' +
@@ -1409,6 +1428,62 @@
                     table.find('td:nth-child(2)').css('padding-left', '10px');
 
                     card5.show();
+                    loadPLMNCodes();
+
+                    document.getElementById('plmnselectradar').addEventListener('input', function () {
+                        var selectedOperator = this.value;
+
+                        if (selectedOperator.length === 0) {
+                            myLineChart2.data = initialPieData;
+                            myLineChart2.update();
+                        } else if (selectedOperator.length === 5) {
+                            var operatorOption = Array.from(document.getElementById('plmnOptions').options).some(function (option) {
+                                return option.value === selectedOperator;
+                            });
+
+                            if (operatorOption) {
+                                fetch(`/api/incidents/${selectedOperator}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        // Compter le nombre d'occurrences de chaque type d'incident
+                                        var counts = data.reduce(function (map, incidentType) {
+                                            map[incidentType] = (map[incidentType] || 0) + 1;
+                                            return map;
+                                        }, {});
+
+                                        var labels = Object.keys(counts);
+                                        var countsArray = Object.values(counts);
+
+                                        var pieData = {
+                                            labels: labels,
+                                            datasets: [{
+                                                data: countsArray,
+                                                backgroundColor: labels.map(() => getRandomColor()),  // Génère une couleur aléatoire pour chaque label
+                                                borderColor: 'rgba(0,0,0,0.1)'
+                                            }]
+                                        };
+
+                                        if (myLineChart2) {
+                                            myLineChart2.data = pieData;
+                                            myLineChart2.update();
+                                        } else {
+                                            var ctx2 = document.getElementById('chart-line2').getContext('2d');
+                                            myLineChart2 = new Chart(ctx2, {
+                                                type: 'pie',
+                                                data: pieData,
+                                                options: {
+                                                    // Vos options de graphique ici
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .catch(error => console.error('Erreur:', error));
+                            } else {
+                                // Afficher un message d'erreur si l'opérateur sélectionné ne correspond pas à une option
+                                alert('L\'opérateur sélectionné ne correspond pas à une option.');
+                            }
+                        }
+                    });
 
                 } else {
                     originalParent.empty().append(cards);
@@ -1437,6 +1512,8 @@
 
                 tableMode = !tableMode;
             });
+
         });
+
     </script>
 }

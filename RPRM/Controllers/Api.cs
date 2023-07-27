@@ -674,6 +674,22 @@ namespace RPRM.Controllers
                 return BadRequest("Erreur lors de la récupération des incidents par pays.");
             }
         }
+        [HttpGet("incidents/{operatorId}")]
+        public async Task<IActionResult> GetIncidentsByOperator(string operatorId)
+        {
+            var incidents = await _context.incidents
+                                          .Where(i => i.Code_PLMN == operatorId)
+                                          .Select(i => i.TypeIncidentLookup.Value)
+                                          .ToListAsync();
+
+            if (incidents == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(incidents);
+        }
+
 
         [HttpGet("filteredServices")]
         public IActionResult GetFilteredServices([FromQuery] List<int> serviceIds, [FromQuery] List<int> directionIds)
