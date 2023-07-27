@@ -8,6 +8,7 @@ Date : 27 juillet 2023
 ![image](https://github.com/abekkali/OrangeRPRM/assets/115674977/d7810692-abac-4d1d-9a4b-f003ea3b0da2)
 
 -Lorsque vous effectuez un survol (hover) sur un incident avec la souris, le nombre d'incident concernant ce type d'incident s'affichent.
+
 ![image](https://github.com/abekkali/OrangeRPRM/assets/115674977/6d5f3251-7b0f-4611-bd89-38e635a95774)
 
 -Filtrer par operateurs (code plmn) sur le radar Pie :
