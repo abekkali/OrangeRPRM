@@ -795,19 +795,11 @@
                         return false; 
                     }
                 });
+                    if (isValidOption) {
+                        $("#searchBtnPlmn").click();
+                    }
+             });
 
-                var enteredValue = $(this).val();
-                var isValidOption = false;
-                $("#plmnOptions option").each(function () {
-                    if ($(this).val() === enteredValue) {
-                        isValidOption = true;
-                        return false; 
-                });
-
-                if (isValidOption) {
-                    $("#searchBtnPlmn").click();
-                }
-            });
           
             $("#plmnSelect").on("keypress", function (event) {
                 if (event.which === 13) {  
