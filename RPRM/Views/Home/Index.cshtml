@@ -781,7 +781,24 @@
                     loadPLMNCodes();
                 }
             });
+            $("#plmnSelect").on("input", function () {
+                var enteredValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
+                console.log("enteredValue", enteredValue);
+                var isValidOption = false;
+                $("#plmnOptions option").each(function () {
+                    var optionValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
 
+                    if (optionValue === enteredValue) {
+                        console.log("valeur saisi", $(this).val());
+
+                        isValidOption = true;
+                        return false; 
+                    }
+                });
+                if (isValidOption) {
+                    $("#searchBtnPlmn").click();
+                }
+            });
           
             $("#plmnSelect").on("keypress", function (event) {
                 if (event.which === 13) {  
