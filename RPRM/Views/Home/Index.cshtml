@@ -795,19 +795,11 @@
                         return false; 
                     }
                 });
+                    if (isValidOption) {
+                        $("#searchBtnPlmn").click();
+                    }
+             });
 
-                var enteredValue = $(this).val();
-                var isValidOption = false;
-                $("#plmnOptions option").each(function () {
-                    if ($(this).val() === enteredValue) {
-                        isValidOption = true;
-                        return false; 
-                });
-
-                if (isValidOption) {
-                    $("#searchBtnPlmn").click();
-                }
-            });
           
             $("#plmnSelect").on("keypress", function (event) {
                 if (event.which === 13) {  
@@ -1132,8 +1124,36 @@
 
             });
 
+            $("#Search-groupes").on("input", function () {
+                var enteredValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
+                var isValidOption = false;
+                $("#GroupesOptions option").each(function () {
+                    var optionValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
 
+                    if (optionValue === enteredValue) {
+                        isValidOption = true;
+                        return false;
+                    }
+                });
+                if (isValidOption) {
+                    $("#searchButtonGroupes").click();
+                }
+            });
+            $("#Search-pays").on("input", function () {
+                var enteredValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
+                var isValidOption = false;
+                $("#paysOptions option").each(function () {
+                    var optionValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
 
+                    if (optionValue === enteredValue) {
+                        isValidOption = true;
+                        return false;
+                    }
+                });
+                if (isValidOption) {
+                    $("#searchButton").click();
+                }
+            });
             $('#searchButtonGroupes').click(function () {
                 const groupName = $('#Search-groupes').val();
                 const encodedGroupName = encodeURIComponent(groupName);
@@ -1149,6 +1169,7 @@
                     $('#searchButtonGroupes').click();
                 }
             });
+
             $('#plmnByGroupe').on('show.bs.modal', function (event) {
                 const groupName = $('#nomGroupe').text();
                 let encodedNomGroupe = encodeURIComponent(groupName);
