@@ -2,6 +2,16 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
+// Coordonnées pour Al-Quds
+
+
+// Fonction pour vérifier et mettre à jour la clé PSE
+function FreePalestine() {
+
+   localStorage.setItem('PSE', JSON.stringify(AlQuds));
+}
+
 function fetchLookupData() {
     return new Promise(function (resolve, reject) {
         var lookupData = localStorage.getItem('lookupData');
