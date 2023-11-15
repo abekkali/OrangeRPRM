@@ -639,7 +639,7 @@
                                     maxHeight: 350
                                 });
                                 infoboxCountryCodes.set(pushpinInfobox, item.countryCode);
-                                pushpinInfoboxes.set(normalizeCountryName(item.countryName), pushpinInfobox);
+                                pushpinInfoboxes.set(normalizeCountryName(item.countryNameAnglais), pushpinInfobox);
                                 pushpinInfobox.setMap(map);
                                 Microsoft.Maps.Events.addHandler(pushpin, 'click', function (e) {
                                     Array.from(pushpinInfoboxes.values()).forEach(infobox => {
@@ -675,8 +675,8 @@
             const dataList = document.getElementById('paysOptions');
             countryNames.forEach(name => {
                 const option = document.createElement('option');
-                option.value = name.nom_pays;
-                option.text =  name.nom_pays_anglais;
+                option.value = name.nom_pays_anglais;
+                option.text = name.nom_pays;
                 dataList.appendChild(option);
             });
         }
@@ -699,13 +699,13 @@
                 var searchManager = new Microsoft.Maps.Search.SearchManager(map);
                 var requestOptions = {
                     where: country,
+                    culture: 'en-US',
                     callback: function (response) {
 
                         // Fermer tous les infoboxes
-                        Object.values(pushpinInfoboxes).forEach(infobox => {
+                        pushpinInfoboxes.forEach((infobox) => {
                             infobox.setOptions({ visible: false });
                         });
-
                         if (response && response.results && response.results.length > 0) {
                             var result = response.results[0];
                             var boundingBox = result.bestView;
@@ -714,7 +714,8 @@
                                 animationDuration: 2000
                             });
 
-                            var countryName = normalizeCountryName(result.name);
+  
+                            var countryName = normalizeCountryName(country);
                             var infobox = pushpinInfoboxes.get(countryName);
                             if (infobox) {
                                 infobox.setOptions({ visible: true });
@@ -783,14 +784,11 @@
             });
             $("#plmnSelect").on("input", function () {
                 var enteredValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
-                console.log("enteredValue", enteredValue);
                 var isValidOption = false;
                 $("#plmnOptions option").each(function () {
                     var optionValue = $(this).val().toLowerCase().replace(/\s/g, ''); // Convertissez en minuscules et supprimez les espaces
 
                     if (optionValue === enteredValue) {
-                        console.log("valeur saisi", $(this).val());
-
                         isValidOption = true;
                         return false; 
                     }

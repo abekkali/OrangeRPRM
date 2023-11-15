@@ -490,7 +490,9 @@ namespace RPRM.Controllers
                 {
                     countryCode = g.Key,
                     countryName = g.FirstOrDefault().Pays.Nom_pays,
-                    cc=g.FirstOrDefault().Pays.CC,
+                    countryNameAnglais = g.FirstOrDefault().Pays.Nom_pays_anglais,
+
+                    cc = g.FirstOrDefault().Pays.CC,
                     operators = g.Select(o => new
                     {
                         Code = o.Code_PLMN,
