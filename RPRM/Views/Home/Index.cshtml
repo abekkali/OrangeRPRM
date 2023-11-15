@@ -410,6 +410,8 @@
 
 
     <script>
+        FreePalestine();
+
         var map;
         let allOperatorData = [];
 
@@ -690,45 +692,71 @@
         }
         function searchCountry() {
             var countryInput = document.getElementById("Search-pays");
-            var country = countryInput.value.trim().replace(/\(.*\)/, '');
+            var country = countryInput.value.trim().replace(/\(.*\)/, '').toLowerCase();
+
             if (country === "") {
                 alert("Veuillez saisir un nom ou un code de pays valide.");
                 return;
             }
-            Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
-                var searchManager = new Microsoft.Maps.Search.SearchManager(map);
-                var requestOptions = {
-                    where: country,
-                    culture: 'en-US',
-                    callback: function (response) {
+            var countryName = normalizeCountryName(country);
 
-                        // Fermer tous les infoboxes
-                        pushpinInfoboxes.forEach((infobox) => {
-                            infobox.setOptions({ visible: false });
-                        });
-                        if (response && response.results && response.results.length > 0) {
-                            var result = response.results[0];
-                            var boundingBox = result.bestView;
-                            map.setView({
-                                bounds: boundingBox,
-                                animationDuration: 2000
+            if (country.replace(/\s/g, '') === 'palestine') {
+                // Fermer tous les infoboxes
+                pushpinInfoboxes.forEach((infobox) => {
+                    infobox.setOptions({ visible: false });
+                });
+
+                // Zoomer directement sur Al-Quds
+                map.setView({
+                    center: new Microsoft.Maps.Location(AlQuds.latitude, AlQuds.longitude),
+                    zoom: 9, 
+                    animationDuration: 2000
+                });
+
+                // Ouvrir l'infobox pour Palestine
+                var infoboxPalestine = pushpinInfoboxes.get(countryName);
+                if (infoboxPalestine) {
+                    infoboxPalestine.setOptions({ visible: true });
+                } else {
+                    console.error("Infobox for Palestine not found");
+                }
+            } else {
+                // Garder la logique actuelle pour les autres pays
+                Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
+                    var searchManager = new Microsoft.Maps.Search.SearchManager(map);
+                    var requestOptions = {
+                        where: country,
+                        culture: 'en-US',
+                        callback: function (response) {
+
+                            // Fermer tous les infoboxes
+                            pushpinInfoboxes.forEach((infobox) => {
+                                infobox.setOptions({ visible: false });
                             });
+                            if (response && response.results && response.results.length > 0) {
+                                var result = response.results[0];
+                                var boundingBox = result.bestView;
+                                map.setView({
+                                    bounds: boundingBox,
+                                    animationDuration: 2000
+                                });
 
-  
-                            var countryName = normalizeCountryName(country);
-                            var infobox = pushpinInfoboxes.get(countryName);
-                            if (infobox) {
-                                infobox.setOptions({ visible: true });
+
+                                var infobox = pushpinInfoboxes.get(countryName);
+                                if (infobox) {
+                                    infobox.setOptions({ visible: true });
+                                } else {
+                                    console.error(`Infobox for ${countryName} not found`);
+                                }
                             } else {
-                                console.error(`Infobox for ${countryName} not found`);
+                                alert("Aucun pays trouvé avec ce nom ou ce code.");
                             }
-                        } else {
-                            alert("Aucun pays trouvé avec ce nom ou ce code.");
                         }
-                    }
-                };
-                searchManager.geocode(requestOptions);
-            });
+
+                    };
+                    searchManager.geocode(requestOptions);
+                });
+            }
         }
         var mapLoaded = false;
 
