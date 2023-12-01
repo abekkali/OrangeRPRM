@@ -541,7 +541,8 @@ namespace RPRM.Controllers
                 TypeOperateur = operateur.TypeOperateur?.Value,
                 TypeAccord = operateur.TypeAccord?.Value,
                 NomPays = operateur.Pays?.Nom_pays,
-                Groupe=operateur.Groupe.Nom_Groupe
+                Groupe=operateur.Groupe.Nom_Groupe,
+                MCCMNC=operateur.MCC+"-"+operateur.MNC
             };
 
             var incidents = _context.incidents

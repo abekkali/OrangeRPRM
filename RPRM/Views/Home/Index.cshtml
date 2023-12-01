@@ -242,6 +242,14 @@
                                                 <div class="accordion-body">
                                                     <table class="table">
                                                         <tr>
+                                                            <th>PLMN</th>
+                                                            <td id="plmn"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>MCC-MNC</th>
+                                                            <td id="mccmnc"></td>
+                                                        </tr>
+                                                        <tr>
                                                             <th>Nom Operateur</th>
                                                             <td id="nomOperateur"></td>
                                                         </tr>
@@ -257,6 +265,8 @@
                                                             <th>Pays</th>
                                                             <td id="pays"></td>
                                                         </tr>
+                                                     
+                                                    
                                                     </table>
 
                                                 </div>
@@ -850,9 +860,10 @@
                     method: "GET",
                     data: { codePlmn: codePlmn },
                     success: function (data) {
-
+                        $("#plmn").text(data.code_PLMN);
                         $("#nomOperateur").text(data.nom_Op);
                         $("#typeOperateur").text(data.typeOperateur);
+                        $("#mccmnc").text(data.mccmnc);
                         $("#typeAccord").text(data.typeAccord);
                         $("#pays").text(data.nomPays);
                         $("#nomGroupe").text(data.groupe);

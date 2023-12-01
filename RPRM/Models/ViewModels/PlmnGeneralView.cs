@@ -12,6 +12,7 @@ namespace RPRM.Models.ViewModels
         public string NomPays { get; set; }
         public string Groupe { get; set; }
         public int NbOperateurs { get; set; }
+        public string MCCMNC { get; set; }
         public List<IncidentViewModel> Incidents { get; set; }
         public List<ContactViewModel> Contacts { get; set; }
         public List<ServiceOuvertsViewModel> ServiceOuverts { get; set; }
